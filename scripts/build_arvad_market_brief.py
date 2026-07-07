@@ -715,10 +715,10 @@ def extract_response_text(payload: dict) -> str:
     return "\n".join(chunks).strip()
 
 
-def call_openai(summary_seed: dict, articles: list[Article], competitor_signals: list[CompetitorSignal]) -> Optional[dict]:
+def call_openai(summary_seed: dict, articles: list[Article], competitor_signals: list[CompetitorSignal]) -> tuple[Optional[dict], str]:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
-        return None
+        return None, "OpenAI summary: no API key"
     model = os.environ.get("OPENAI_MODEL", "gpt-5-mini")
     seed_json = {
         "company_context": COMPANY_CONTEXT,
@@ -753,11 +753,11 @@ def call_openai(summary_seed: dict, articles: list[Article], competitor_signals:
             response_payload = json.loads(response.read().decode("utf-8"))
         text = extract_response_text(response_payload)
         if not text:
-            return None
-        return json.loads(text)
+            return None, "OpenAI summary: empty response, fallback to rules"
+        return json.loads(text), f"OpenAI summary: request succeeded with model {model}"
     except Exception as exc:
         print(f"OpenAI summarization failed, falling back to rules: {exc}", file=sys.stderr)
-        return None
+        return None, f"OpenAI summary: fallback after API error ({exc})"
 
 
 def ensure_appendix(summary: dict, articles: list[Article], competitor_signals: list[CompetitorSignal]) -> dict:
@@ -1318,7 +1318,9 @@ def main():
     rates = fetch_cbr_rates_safe(run_date)
     fx_history = fetch_cbr_weekly_rates(run_date)
     fallback = build_fallback_summary(articles, competitor_signals, run_date, rates, fx_history)
-    summary = call_openai(fallback, articles, competitor_signals) or fallback
+    openai_summary, openai_status = call_openai(fallback, articles, competitor_signals)
+    print(openai_status)
+    summary = openai_summary or fallback
     outputs = write_outputs(summary, articles, competitor_signals, run_date)
     save_latest_cache(summary, articles, competitor_signals, rates, run_date)
 
