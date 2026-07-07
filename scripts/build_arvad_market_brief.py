@@ -44,6 +44,15 @@ watch_signals: 2-4 темы.
 Если обязательных источников мало, честно говори это в day_assessment.
 Не добавляй ничего вне JSON."""
 
+BLOCK_QUOTAS = {
+    "Маркетплейсы и каналы": 4,
+    "Стройка, жильё и ремонт": 5,
+    "DIY ритейл": 5,
+    "Импорт, Китай, логистика и платежи": 4,
+    "Регулирование и локализация": 4,
+    "Беларусь": 3,
+}
+
 RELEVANT_KEYWORDS = {
     "marketplace": ["wildberries", "ozon", "яндекс маркет", "marketplace", "маркетплейс", "seller", "селлер", "комисси", "карточ"],
     "logistics": ["топлив", "логист", "достав", "перевоз", "склад", "fbo", "fbs", "себестоим"],
@@ -389,6 +398,48 @@ def fetch_cbr_rates_safe(run_date: datetime) -> dict[str, str]:
         return {}
 
 
+def parse_rate_value(value: str) -> Optional[float]:
+    if not value:
+        return None
+    try:
+        return float(value.replace(",", "."))
+    except ValueError:
+        return None
+
+
+def fetch_cbr_weekly_rates(run_date: datetime, days: int = 7) -> dict[str, list[dict[str, str]]]:
+    history = {"USD": [], "CNY": []}
+    for offset in range(days - 1, -1, -1):
+        current_date = run_date - timedelta(days=offset)
+        rates = fetch_cbr_rates_safe(current_date)
+        for code in ("USD", "CNY"):
+            history[code].append(
+                {
+                    "date": current_date.strftime("%d.%m"),
+                    "value": rates.get(code, ""),
+                }
+            )
+    return history
+
+
+def build_fx_forecast(history: list[dict[str, str]], code: str) -> str:
+    values = [parse_rate_value(item["value"]) for item in history if parse_rate_value(item["value"]) is not None]
+    if len(values) < 2:
+        return f"{code}: данных недостаточно для прогноза."
+    change = values[-1] - values[0]
+    pct = (change / values[0] * 100) if values[0] else 0.0
+    if abs(pct) < 1.0:
+        trend = "боковик"
+        action = "держать короткий горизонт фиксации, без агрессивных пересмотров цен"
+    elif change > 0:
+        trend = "умеренный рост"
+        action = "не затягивать платежи и проверить запас по валютной марже"
+    else:
+        trend = "умеренное снижение"
+        action = "можно точечно отложить часть конверсий, но без накопления риска"
+    return f"{code}: за неделю {trend} ({pct:+.1f}%). Инерционный прогноз на новую неделю: {trend}; действие: {action}."
+
+
 def gather_articles(run_date: datetime, lookback_hours: int) -> list[Article]:
     min_dt = run_date - timedelta(hours=lookback_hours)
     articles: list[Article] = []
@@ -537,13 +588,68 @@ def select_main_articles(articles: list[Article]) -> list[Article]:
     return selected[:8]
 
 
+def classify_article_block(article: Article) -> Optional[str]:
+    haystack = f"{article.title} {article.snippet}".lower()
+    if any(keyword in haystack for keyword in ["беларус", "минск", "belta", "еаэс", "брест", "право.by"]):
+        return "Беларусь"
+    if any(keyword in haystack for keyword in ["wildberries", "ozon", "яндекс маркет", "маркетплейс", "селлер", "комисси", "карточ", "авито"]):
+        return "Маркетплейсы и каналы"
+    if any(keyword in haystack for keyword in ["ипотек", "новостро", "ремонт", "отделк", "строитель", "жиль", "квартир", "дом"]):
+        return "Стройка, жильё и ремонт"
+    if any(keyword in haystack for keyword in ["diy", "лемана", "леруа", "петрович", "максидом", "всеинструменты", "obi"]):
+        return "DIY ритейл"
+    if any(keyword in haystack for keyword in ["китай", "юан", "cny", "импорт", "тамож", "пошлин", "платеж", "логист", "достав", "склад", "топлив", "перевоз"]):
+        return "Импорт, Китай, логистика и платежи"
+    if any(keyword in haystack for keyword in ["гост", "локализ", "минпром", "сертифик", "регулирован", "поддержк", "маркиров", "российской полке", "налогооблож"]):
+        return "Регулирование и локализация"
+    return None
+
+
+def article_to_signal(article: Article) -> dict[str, str]:
+    happened = article.snippet or article.title
+    if happened and not happened.endswith("."):
+        happened += "."
+    return {
+        "source": article.source,
+        "happened": happened[:360],
+        "why": article_why(article.theme),
+        "action": article_action(article.theme),
+    }
+
+
+def build_grouped_signals(articles: list[Article]) -> dict[str, list[dict[str, str]]]:
+    grouped = {block: [] for block in BLOCK_QUOTAS}
+    used_urls = set()
+    ordered_articles = sorted(articles, key=lambda item: (item.score, item.published_at), reverse=True)
+    for article in ordered_articles:
+        if article.url in used_urls:
+            continue
+        block = classify_article_block(article)
+        if not block:
+            continue
+        if len(grouped[block]) >= BLOCK_QUOTAS[block]:
+            continue
+        grouped[block].append(article_to_signal(article))
+        used_urls.add(article.url)
+    return grouped
+
+
+def flatten_grouped_signals(grouped_signals: dict[str, list[dict[str, str]]]) -> list[dict[str, str]]:
+    flat = []
+    for block in BLOCK_QUOTAS:
+        flat.extend(grouped_signals.get(block, []))
+    return flat
+
+
 def build_fallback_summary(
     articles: list[Article],
     competitor_signals: list[CompetitorSignal],
     run_date: datetime,
     rates: dict[str, str],
+    fx_history: dict[str, list[dict[str, str]]],
 ) -> dict:
-    selected_articles = select_main_articles(articles)
+    grouped_signals = build_grouped_signals(articles)
+    selected_articles = flatten_grouped_signals(grouped_signals)
     dominant_themes = []
     for theme in ("marketplace", "logistics", "china", "housing", "regulation", "belarus", "design"):
         if any(article.theme == theme for article in articles):
@@ -562,23 +668,14 @@ def build_fallback_summary(
         f"доминируют: {', '.join(theme_names[t] for t in dominant_themes[:3]) or 'каналы и спрос'}. "
         f"По конкурентам открытый social-pass дал {len(competitor_signals)} наблюдаемых публикаций."
     )
-    main_signals = []
-    for article in selected_articles:
-        happened = article.snippet or article.title
-        if happened and not happened.endswith("."):
-            happened += "."
-        main_signals.append(
-            {
-                "source": article.source,
-                "happened": happened[:360],
-                "why": article_why(article.theme),
-                "action": article_action(article.theme),
-            }
-        )
+    fx_forecast = {
+        "USD": build_fx_forecast(fx_history.get("USD", []), "USD/RUB"),
+        "CNY": build_fx_forecast(fx_history.get("CNY", []), "CNY/RUB"),
+    }
     fx_block = (
         f"Источник: ЦБ РФ. Дата: {run_date.strftime('%d.%m.%Y')}. "
         f"USD/RUB: {rates.get('USD', 'н/д')}. CNY/RUB: {rates.get('CNY', 'н/д')}. "
-        "Практический вывод: не растягивать валютные решения, а вести платежи Китаю коротким циклом."
+        f"Прогноз: {fx_forecast['USD']} {fx_forecast['CNY']}"
     )
     actions_today = [
         "Пересчитать экономику Wildberries по топ-SKU смесителей и аксессуаров.",
@@ -596,8 +693,11 @@ def build_fallback_summary(
     return {
         "title": f"ARVAD GROUP — weekly-сводка за {run_date.strftime('%d.%m.%Y')}",
         "day_assessment": day_assessment,
-        "main_signals": main_signals,
+        "main_signals": selected_articles,
+        "grouped_signals": grouped_signals,
         "fx_block": fx_block,
+        "fx_history": fx_history,
+        "fx_forecast": fx_forecast,
         "actions_today": actions_today,
         "watch_signals": watch_signals,
     }
@@ -661,9 +761,52 @@ def call_openai(summary_seed: dict, articles: list[Article], competitor_signals:
 
 
 def ensure_appendix(summary: dict, articles: list[Article], competitor_signals: list[CompetitorSignal]) -> dict:
+    if "grouped_signals" not in summary:
+        summary["grouped_signals"] = build_grouped_signals(articles)
+    summary["main_signals"] = flatten_grouped_signals(summary["grouped_signals"])
     summary["appendix_items"] = [asdict(article) for article in articles[:18]]
     summary["competitor_signals"] = [asdict(item) for item in competitor_signals[:8]]
     return summary
+
+
+def render_fx_history_markdown(summary: dict) -> list[str]:
+    lines = ["## Курс валют: динамика за неделю", ""]
+    for code in ("USD", "CNY"):
+        lines.append(f"### {code}/RUB")
+        for item in summary.get("fx_history", {}).get(code, []):
+            lines.append(f"- {item['date']}: {item['value'] or 'н/д'}")
+        forecast_text = summary.get("fx_forecast", {}).get(code)
+        if forecast_text:
+            lines.append(f"- Прогноз: {forecast_text}")
+        lines.append("")
+    return lines
+
+
+def build_chart_svg(points: list[Optional[float]], color: str) -> str:
+    width = 280
+    height = 90
+    padding = 10
+    valid = [point for point in points if point is not None]
+    if len(valid) < 2:
+        return ""
+    min_v = min(valid)
+    max_v = max(valid)
+    span = max(max_v - min_v, 0.0001)
+    coords = []
+    for idx, point in enumerate(points):
+        if point is None:
+            continue
+        x = padding + idx * ((width - 2 * padding) / max(len(points) - 1, 1))
+        y = height - padding - ((point - min_v) / span) * (height - 2 * padding)
+        coords.append(f"{x:.1f},{y:.1f}")
+    if len(coords) < 2:
+        return ""
+    polyline = " ".join(coords)
+    return (
+        f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='chart'>"
+        f"<polyline fill='none' stroke='{color}' stroke-width='3' points='{polyline}' />"
+        f"</svg>"
+    )
 
 
 def save_latest_cache(
@@ -758,17 +901,28 @@ def build_offline_summary(run_date: datetime, cached_payload: Optional[dict]) ->
 
 def render_markdown(summary: dict, articles: list[Article], competitor_signals: list[CompetitorSignal]) -> str:
     lines = [f"# {summary['title']}", "", summary["day_assessment"], ""]
-    for idx, signal in enumerate(summary["main_signals"], start=1):
-        lines.extend(
-            [
-                f"## {idx}. {signal['source']}",
-                f"- Что произошло: {signal['happened']}",
-                f"- Почему важно для ARVAD: {signal['why']}",
-                f"- Что проверить / действие: {signal['action']}",
-                "",
-            ]
-        )
-    lines.extend(["## Курсы и краткий взгляд", summary["fx_block"], "", "## Что проверить сегодня"])
+    lines.append("## Основные сигналы недели")
+    lines.append("")
+    for block, quota in BLOCK_QUOTAS.items():
+        block_signals = summary.get("grouped_signals", {}).get(block, [])
+        lines.append(f"### {block} (до {quota})")
+        if not block_signals:
+            lines.append("- Существенных сигналов за период не выделено.")
+            lines.append("")
+            continue
+        for signal in block_signals:
+            lines.extend(
+                [
+                    f"- Источник: {signal['source']}",
+                    f"  Что произошло: {signal['happened']}",
+                    f"  Почему важно: {signal['why']}",
+                    f"  Что проверить: {signal['action']}",
+                ]
+            )
+        lines.append("")
+    lines.extend(["## Курсы и краткий взгляд", summary["fx_block"], ""])
+    lines.extend(render_fx_history_markdown(summary))
+    lines.append("## Что проверить сегодня")
     for item in summary["actions_today"]:
         lines.append(f"- {item}")
     lines.extend(["", "## Сигналы для наблюдения"])
@@ -793,16 +947,33 @@ def html_escape(text: str) -> str:
 
 
 def render_html(summary: dict) -> str:
-    signals_rows = []
-    for signal in summary["main_signals"]:
-        signals_rows.append(
+    grouped_sections = []
+    for block, quota in BLOCK_QUOTAS.items():
+        rows = []
+        for signal in summary.get("grouped_signals", {}).get(block, []):
+            rows.append(
+                f"""
+                <tr>
+                  <td>{html_escape(signal['source'])}</td>
+                  <td>{html_escape(signal['happened'])}</td>
+                  <td>{html_escape(signal['why'])}</td>
+                  <td>{html_escape(signal['action'])}</td>
+                </tr>
+                """
+            )
+        grouped_sections.append(
             f"""
-            <tr>
-              <td>{html_escape(signal['source'])}</td>
-              <td>{html_escape(signal['happened'])}</td>
-              <td>{html_escape(signal['why'])}</td>
-              <td>{html_escape(signal['action'])}</td>
-            </tr>
+            <div class="panel">
+              <h3>{html_escape(block)} <span class="quota">до {quota}</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  {''.join(rows) or '<tr><td colspan="4">Существенных сигналов за период не выделено.</td></tr>'}
+                </tbody>
+              </table>
+            </div>
             """
         )
     competitor_rows = []
@@ -819,6 +990,10 @@ def render_html(summary: dict) -> str:
         )
     actions_html = "".join(f"<li>{html_escape(item)}</li>" for item in summary["actions_today"])
     watch_html = "".join(f"<li>{html_escape(item)}</li>" for item in summary["watch_signals"])
+    usd_points = [parse_rate_value(item["value"]) for item in summary.get("fx_history", {}).get("USD", [])]
+    cny_points = [parse_rate_value(item["value"]) for item in summary.get("fx_history", {}).get("CNY", [])]
+    usd_chart = build_chart_svg(usd_points, "#0c4d8a")
+    cny_chart = build_chart_svg(cny_points, "#d96c00")
     appendix_rows = []
     for item in summary.get("appendix_items", []):
         appendix_rows.append(
@@ -916,6 +1091,11 @@ def render_html(summary: dict) -> str:
       font-size: 17px;
       color: var(--blue);
     }}
+    .quota {{
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 14px;
+    }}
     .metric .label {{
       font-size: 14px;
       text-transform: uppercase;
@@ -961,9 +1141,20 @@ def render_html(summary: dict) -> str:
     }}
     li + li {{ margin-top: 8px; }}
     a {{ color: var(--blue); text-decoration: none; }}
+    .chart-wrap {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }}
+    .chart-note {{
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--muted);
+      margin-top: 8px;
+    }}
     @media (max-width: 1200px) {{
       .slide {{ min-height: auto; padding: 28px; }}
-      .grid-2, .grid-4 {{ grid-template-columns: 1fr; }}
+      .grid-2, .grid-4, .chart-wrap {{ grid-template-columns: 1fr; }}
       .topbar {{ flex-direction: column; gap: 14px; }}
       .meta {{ text-align: left; }}
     }}
@@ -994,6 +1185,22 @@ def render_html(summary: dict) -> str:
           <ul>{watch_html}</ul>
         </div>
       </div>
+      <div class="panel">
+        <h3>Курс валют: динамика за неделю и прогноз</h3>
+        <p class="subtitle">{html_escape(summary['fx_block'])}</p>
+        <div class="chart-wrap">
+          <div>
+            <h3>USD/RUB</h3>
+            {usd_chart or '<div class="chart-note">Недостаточно данных для графика.</div>'}
+            <div class="chart-note">{html_escape(summary.get('fx_forecast', {}).get('USD', ''))}</div>
+          </div>
+          <div>
+            <h3>CNY/RUB</h3>
+            {cny_chart or '<div class="chart-note">Недостаточно данных для графика.</div>'}
+            <div class="chart-note">{html_escape(summary.get('fx_forecast', {}).get('CNY', ''))}</div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="slide">
@@ -1001,17 +1208,7 @@ def render_html(summary: dict) -> str:
         <div class="brand">Arvad<br>Group</div>
         <div class="meta">Главные weekly-сигналы из обязательных и дополнительных источников.</div>
       </div>
-      <div class="panel">
-        <h3>Основные сигналы недели</h3>
-        <table>
-          <thead>
-            <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
-          </thead>
-          <tbody>
-            {''.join(signals_rows)}
-          </tbody>
-        </table>
-      </div>
+      {''.join(grouped_sections)}
     </section>
 
     <section class="slide">
@@ -1119,7 +1316,8 @@ def main():
         raise RuntimeError("No relevant materials collected from configured sources.")
 
     rates = fetch_cbr_rates_safe(run_date)
-    fallback = build_fallback_summary(articles, competitor_signals, run_date, rates)
+    fx_history = fetch_cbr_weekly_rates(run_date)
+    fallback = build_fallback_summary(articles, competitor_signals, run_date, rates, fx_history)
     summary = call_openai(fallback, articles, competitor_signals) or fallback
     outputs = write_outputs(summary, articles, competitor_signals, run_date)
     save_latest_cache(summary, articles, competitor_signals, rates, run_date)
