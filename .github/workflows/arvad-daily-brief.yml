@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,4 +50,4 @@ jobs:
           git add output/
           git diff --cached --quiet && exit 0
           git commit -m "chore: update ARVAD weekly brief"
-          git push
+          git push origin HEAD:${{ github.ref_name }}
