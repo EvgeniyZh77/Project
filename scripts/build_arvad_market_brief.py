@@ -55,6 +55,51 @@ RELEVANT_KEYWORDS = {
     "design": ["дизайн", "интерьер", "коллекц", "ванн", "душев", "смесител"],
 }
 
+CATEGORY_PRIORITY_KEYWORDS = [
+    "сантех",
+    "смесител",
+    "душев",
+    "ванн",
+    "раковин",
+    "унитаз",
+    "инсталляц",
+    "дизайн ванной",
+    "санфаянс",
+    "аксессуар для ванной",
+    "ремонт",
+    "отделк",
+    "новостро",
+    "ипотек",
+    "строитель",
+    "diy",
+    "петрович",
+    "леруа",
+    "лемана",
+    "максидом",
+    "всеинструменты",
+]
+
+BUSINESS_SIGNAL_KEYWORDS = [
+    "wildberries",
+    "ozon",
+    "яндекс маркет",
+    "маркетплейс",
+    "комисси",
+    "логист",
+    "достав",
+    "склад",
+    "китай",
+    "юан",
+    "импорт",
+    "тамож",
+    "платеж",
+    "локализ",
+    "маркиров",
+    "гост",
+    "беларус",
+    "еаэс",
+]
+
 STRONG_KEEP_KEYWORDS = [
     "wildberries",
     "ozon",
@@ -84,6 +129,33 @@ STRONG_KEEP_KEYWORDS = [
     "яндекс маркет",
     "душев",
     "коллекц",
+]
+
+EXCLUDE_KEYWORDS = [
+    "морожен",
+    "молочн",
+    "коктейл",
+    "сосиск",
+    "сардел",
+    "птицевод",
+    "мясокомбинат",
+    "мясо",
+    "птиц",
+    "морепродукт",
+    "напитк",
+    "кофе",
+    "чай",
+    "шоколад",
+    "мороженое",
+    "продукт питан",
+    "еда",
+    "ресторан",
+    "доставк[аи] еды",
+    "робокурьер",
+    "авто",
+    "автомобил",
+    "палат",
+    "сапборд",
 ]
 
 IRRELEVANT_KEYWORDS = [
@@ -216,6 +288,22 @@ def detect_theme(text: str) -> str:
     return best_theme
 
 
+def count_keyword_hits(text: str, keywords: list[str]) -> int:
+    return sum(1 for keyword in keywords if keyword in text)
+
+
+def has_regex_pattern(text: str, patterns: list[str]) -> bool:
+    return any(re.search(pattern, text) for pattern in patterns)
+
+
+def is_category_article(text: str) -> bool:
+    return count_keyword_hits(text, CATEGORY_PRIORITY_KEYWORDS) > 0
+
+
+def is_business_signal_article(text: str) -> bool:
+    return count_keyword_hits(text, BUSINESS_SIGNAL_KEYWORDS) > 0
+
+
 def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int:
     text = f"{title} {snippet}".lower()
     score = 0
@@ -223,6 +311,10 @@ def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int
         for keyword in keywords:
             if keyword in text:
                 score += 3 if len(keyword) > 5 else 1
+    score += count_keyword_hits(text, CATEGORY_PRIORITY_KEYWORDS) * 4
+    score += count_keyword_hits(text, BUSINESS_SIGNAL_KEYWORDS) * 2
+    if has_regex_pattern(text, EXCLUDE_KEYWORDS):
+        score -= 12
     if mandatory:
         score += 5
     if any(word in text for word in ["wildberries", "ozon", "ипотек", "китай", "топлив", "логист", "лемана"]):
@@ -232,10 +324,16 @@ def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int
 
 def is_relevant(title: str, snippet: str) -> bool:
     text = f"{title} {snippet}".lower()
+    if has_regex_pattern(text, EXCLUDE_KEYWORDS) and not is_category_article(text):
+        return False
     if any(keyword in text for keyword in IRRELEVANT_KEYWORDS) and not any(
         keyword in text for keyword in STRONG_KEEP_KEYWORDS
     ):
         return False
+    if is_category_article(text):
+        return True
+    if is_business_signal_article(text):
+        return True
     return any(keyword in text for keyword in STRONG_KEEP_KEYWORDS)
 
 
@@ -383,6 +481,20 @@ def article_action(theme: str) -> str:
 def select_main_articles(articles: list[Article]) -> list[Article]:
     selected: list[Article] = []
     used_urls = set()
+    category_terms = [
+        "сантех",
+        "смесител",
+        "душев",
+        "ванн",
+        "ремонт",
+        "новостро",
+        "строитель",
+        "diy",
+        "леруа",
+        "лемана",
+        "петрович",
+        "всеинструменты",
+    ]
     preferred_terms = [
         "wildberries",
         "ozon",
@@ -394,6 +506,15 @@ def select_main_articles(articles: list[Article]) -> list[Article]:
         "платеж",
         "беларус",
     ]
+    for term in category_terms:
+        for article in articles:
+            haystack = f"{article.title} {article.snippet}".lower()
+            if article.url in used_urls:
+                continue
+            if term in haystack:
+                selected.append(article)
+                used_urls.add(article.url)
+                break
     for term in preferred_terms:
         for article in articles:
             haystack = f"{article.title} {article.snippet}".lower()
@@ -405,6 +526,9 @@ def select_main_articles(articles: list[Article]) -> list[Article]:
                 break
     for article in articles:
         if article.url in used_urls:
+            continue
+        haystack = f"{article.title} {article.snippet}".lower()
+        if has_regex_pattern(haystack, EXCLUDE_KEYWORDS) and not is_category_article(haystack):
             continue
         if len(selected) >= 8:
             break
