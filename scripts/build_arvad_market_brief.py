@@ -41,6 +41,8 @@ actions_today: 3-5 коротких конкретных действий.
 watch_signals: 2-4 темы.
 Пиши по-русски, коротко и по делу.
 Фокус: маркетплейсы, DIY, ритейл, стройка, импорт, Китай, Беларусь, регулирование, конкуренты.
+Жестко исключай нерелевантный шум: FMCG, продукты питания, рестораны, fashion, электроника, спорт, lifestyle и общий ритейл без прямой связи с сантехникой, ремонтом, DIY, импортом, локализацией, Беларусью или каналами ARVAD.
+Не включай общие корпоративные или потребительские новости, если у них нет прямого эффекта на спрос на сантехнику, закупки, цены, логистику, платежи, локализацию, сертификацию или ключевые каналы продаж ARVAD.
 Если обязательных источников мало, честно говори это в day_assessment.
 Не добавляй ничего вне JSON."""
 
@@ -88,12 +90,79 @@ CATEGORY_PRIORITY_KEYWORDS = [
     "всеинструменты",
 ]
 
+PRODUCT_ANCHOR_KEYWORDS = [
+    "сантех",
+    "смесител",
+    "душев",
+    "ванн",
+    "раковин",
+    "унитаз",
+    "инсталляц",
+    "санфаянс",
+    "аксессуар для ванной",
+    "зеркало для ванной",
+]
+
+CHANNEL_ANCHOR_KEYWORDS = [
+    "wildberries",
+    "ozon",
+    "яндекс маркет",
+    "маркетплейс",
+    "seller",
+    "селлер",
+    "diy",
+    "лемана",
+    "леруа",
+    "петрович",
+    "максидом",
+    "всеинструменты",
+    "obi",
+]
+
+DEMAND_ANCHOR_KEYWORDS = [
+    "ремонт",
+    "отделк",
+    "новостро",
+    "ипотек",
+    "строитель",
+    "жиль",
+    "квартир",
+    "дом",
+]
+
+SUPPLY_ANCHOR_KEYWORDS = [
+    "китай",
+    "юан",
+    "cny",
+    "импорт",
+    "тамож",
+    "пошлин",
+    "трансгранич",
+    "платеж",
+    "локализ",
+    "минпром",
+    "сертифик",
+    "регулирован",
+    "поддержк",
+    "маркиров",
+    "гост",
+    "беларус",
+    "минск",
+    "еаэс",
+]
+
 BUSINESS_SIGNAL_KEYWORDS = [
     "wildberries",
     "ozon",
     "яндекс маркет",
     "маркетплейс",
     "комисси",
+    "скидк",
+    "промо",
+    "цена",
+    "ассортимент",
+    "sku",
+    "оборачиваем",
     "логист",
     "достав",
     "склад",
@@ -157,11 +226,11 @@ EXCLUDE_KEYWORDS = [
     "шоколад",
     "мороженое",
     "продукт питан",
-    "еда",
+    "\\bеда\\b",
     "ресторан",
     "доставк[аи] еды",
     "робокурьер",
-    "авто",
+    "\\bавто\\b",
     "автомобил",
     "палат",
     "сапборд",
@@ -183,6 +252,24 @@ IRRELEVANT_KEYWORDS = [
     "мотоцикл",
     "кинотеатр",
     "посольств",
+]
+
+GENERIC_RETAIL_NOISE_KEYWORDS = [
+    "fmcg",
+    "fashion",
+    "одежд",
+    "обув",
+    "космет",
+    "парфюм",
+    "аптек",
+    "лекар",
+    "фарма",
+    "бад",
+    "бытов[а-я]* техник",
+    "смартфон",
+    "ноутбук",
+    "телевиз",
+    "электроник",
 ]
 
 MANDATORY_SOURCES = {
@@ -313,6 +400,35 @@ def is_business_signal_article(text: str) -> bool:
     return count_keyword_hits(text, BUSINESS_SIGNAL_KEYWORDS) > 0
 
 
+def has_product_anchor(text: str) -> bool:
+    return count_keyword_hits(text, PRODUCT_ANCHOR_KEYWORDS) > 0
+
+
+def has_channel_anchor(text: str) -> bool:
+    return count_keyword_hits(text, CHANNEL_ANCHOR_KEYWORDS) > 0
+
+
+def has_demand_anchor(text: str) -> bool:
+    return count_keyword_hits(text, DEMAND_ANCHOR_KEYWORDS) > 0
+
+
+def has_supply_anchor(text: str) -> bool:
+    return count_keyword_hits(text, SUPPLY_ANCHOR_KEYWORDS) > 0
+
+
+def has_arvad_context_anchor(text: str) -> bool:
+    return any(
+        (
+            has_product_anchor(text),
+            has_channel_anchor(text),
+            has_supply_anchor(text),
+            count_keyword_hits(text, DEMAND_ANCHOR_KEYWORDS) >= 2,
+            "ремонт" in text,
+            "отделк" in text,
+        )
+    )
+
+
 def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int:
     text = f"{title} {snippet}".lower()
     score = 0
@@ -322,8 +438,13 @@ def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int
                 score += 3 if len(keyword) > 5 else 1
     score += count_keyword_hits(text, CATEGORY_PRIORITY_KEYWORDS) * 4
     score += count_keyword_hits(text, BUSINESS_SIGNAL_KEYWORDS) * 2
+    score += count_keyword_hits(text, PRODUCT_ANCHOR_KEYWORDS) * 5
+    score += count_keyword_hits(text, CHANNEL_ANCHOR_KEYWORDS) * 3
+    score += count_keyword_hits(text, SUPPLY_ANCHOR_KEYWORDS) * 2
     if has_regex_pattern(text, EXCLUDE_KEYWORDS):
         score -= 12
+    if has_regex_pattern(text, GENERIC_RETAIL_NOISE_KEYWORDS) and not has_product_anchor(text):
+        score -= 10
     if mandatory:
         score += 5
     if any(word in text for word in ["wildberries", "ozon", "ипотек", "китай", "топлив", "логист", "лемана"]):
@@ -333,17 +454,31 @@ def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int
 
 def is_relevant(title: str, snippet: str) -> bool:
     text = f"{title} {snippet}".lower()
-    if has_regex_pattern(text, EXCLUDE_KEYWORDS) and not is_category_article(text):
+    if has_regex_pattern(text, EXCLUDE_KEYWORDS):
+        return False
+    if has_regex_pattern(text, GENERIC_RETAIL_NOISE_KEYWORDS) and not has_product_anchor(text):
         return False
     if any(keyword in text for keyword in IRRELEVANT_KEYWORDS) and not any(
         keyword in text for keyword in STRONG_KEEP_KEYWORDS
     ):
         return False
-    if is_category_article(text):
+    if has_product_anchor(text):
         return True
-    if is_business_signal_article(text):
+    if has_channel_anchor(text) and is_business_signal_article(text):
         return True
-    return any(keyword in text for keyword in STRONG_KEEP_KEYWORDS)
+    if has_supply_anchor(text) and (
+        is_business_signal_article(text) or has_product_anchor(text) or has_channel_anchor(text)
+    ):
+        return True
+    if has_demand_anchor(text) and (
+        count_keyword_hits(text, DEMAND_ANCHOR_KEYWORDS) >= 2
+        or "ремонт" in text
+        or "отделк" in text
+    ):
+        return True
+    if is_category_article(text) and has_arvad_context_anchor(text):
+        return True
+    return any(keyword in text for keyword in STRONG_KEEP_KEYWORDS) and has_arvad_context_anchor(text)
 
 
 def parse_rss(source: str, url: str, mandatory: bool, min_dt: datetime) -> list[Article]:
