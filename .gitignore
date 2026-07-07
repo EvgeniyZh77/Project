@@ -3,7 +3,6 @@
 .pycache/
 tmp/
 cache/
-output/
 *.pyc
 *.pyo
 *.pyd
