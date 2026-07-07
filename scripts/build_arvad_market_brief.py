@@ -719,7 +719,7 @@ def call_openai(summary_seed: dict, articles: list[Article], competitor_signals:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         return None, "OpenAI summary: no API key"
-    model = os.environ.get("OPENAI_MODEL", "gpt-5-mini")
+    model = os.environ.get("OPENAI_MODEL", "gpt-5")
     seed_json = {
         "company_context": COMPANY_CONTEXT,
         "prebuilt_summary": summary_seed,
@@ -784,8 +784,9 @@ def render_fx_history_markdown(summary: dict) -> list[str]:
 
 def build_chart_svg(points: list[Optional[float]], color: str) -> str:
     width = 280
-    height = 90
-    padding = 10
+    height = 110
+    padding_x = 10
+    padding_y = 24
     valid = [point for point in points if point is not None]
     if len(valid) < 2:
         return ""
@@ -793,18 +794,28 @@ def build_chart_svg(points: list[Optional[float]], color: str) -> str:
     max_v = max(valid)
     span = max(max_v - min_v, 0.0001)
     coords = []
+    markers = []
     for idx, point in enumerate(points):
         if point is None:
             continue
-        x = padding + idx * ((width - 2 * padding) / max(len(points) - 1, 1))
-        y = height - padding - ((point - min_v) / span) * (height - 2 * padding)
+        x = padding_x + idx * ((width - 2 * padding_x) / max(len(points) - 1, 1))
+        y = height - padding_y - ((point - min_v) / span) * (height - 2 * padding_y)
         coords.append(f"{x:.1f},{y:.1f}")
+        label_y = max(12, y - 8)
+        if label_y < 16:
+            label_y = min(height - 6, y + 16)
+        markers.append(
+            f"<circle cx='{x:.1f}' cy='{y:.1f}' r='3.5' fill='{color}' />"
+            f"<text x='{x:.1f}' y='{label_y:.1f}' text-anchor='middle' "
+            f"font-size='10' font-family='Arial, sans-serif' fill='{color}'>{point:.2f}</text>"
+        )
     if len(coords) < 2:
         return ""
     polyline = " ".join(coords)
     return (
         f"<svg viewBox='0 0 {width} {height}' width='{width}' height='{height}' role='img' aria-label='chart'>"
         f"<polyline fill='none' stroke='{color}' stroke-width='3' points='{polyline}' />"
+        f"{''.join(markers)}"
         f"</svg>"
     )
 

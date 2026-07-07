@@ -17,7 +17,7 @@
 `Variables`
 
 - `ARVAD_BITRIX_DIALOG_ID=chat4071`
-- `OPENAI_MODEL=gpt-5-mini`
+- `OPENAI_MODEL=gpt-5`
 
 5. Открыть `Actions -> ARVAD Weekly Market Brief`.
 6. Нажать `Run workflow`.
