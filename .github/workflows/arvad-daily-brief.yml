@@ -1,0 +1,51 @@
+name: ARVAD Weekly Market Brief
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 2 * * 1"
+
+jobs:
+  build-brief:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TZ: Asia/Yekaterinburg
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+      ARVAD_BITRIX_WEBHOOK_URL: ${{ secrets.ARVAD_BITRIX_WEBHOOK_URL }}
+      ARVAD_BITRIX_DIALOG_ID: ${{ vars.ARVAD_BITRIX_DIALOG_ID || 'chat4071' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build weekly brief and send HTML to Bitrix24
+        run: python scripts/build_arvad_market_brief.py --lookback-hours 168 --send-bitrix
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: arvad-weekly-brief
+          path: |
+            output/html/*.html
+            output/json/*.json
+            output/markdown/*.md
+          if-no-files-found: error
+
+      - name: Commit latest outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: update ARVAD weekly brief"
+          git push

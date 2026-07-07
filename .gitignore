@@ -1,0 +1,9 @@
+.DS_Store
+.swp
+.pycache/
+tmp/
+cache/
+output/
+*.pyc
+*.pyo
+*.pyd
