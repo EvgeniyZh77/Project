@@ -24,9 +24,10 @@ MD_DIR = OUTPUT_DIR / "markdown"
 HTML_DIR = OUTPUT_DIR / "html"
 CACHE_DIR = BASE_DIR / "cache"
 LATEST_CACHE_PATH = CACHE_DIR / "latest_success.json"
+PENDING_SIGNALS_PATH = BASE_DIR / "input" / "pending_signals.md"
 LOCAL_TZ = timezone(timedelta(hours=5))
 
-BITRIX_DIALOG_ID = os.environ.get("ARVAD_BITRIX_DIALOG_ID", "chat4071")
+BITRIX_DIALOG_ID = os.environ.get("ARVAD_BITRIX_DIALOG_ID", "5")
 
 COMPANY_CONTEXT = """ARVAD GROUP производит сантехнику в Китае и России; доля производства в России около 15%.
 Около 60% ассортимента и продаж составляют смесители.
@@ -257,6 +258,8 @@ IRRELEVANT_KEYWORDS = [
 GENERIC_RETAIL_NOISE_KEYWORDS = [
     "fmcg",
     "fashion",
+    "м\\.видео",
+    "эльдорад",
     "одежд",
     "обув",
     "космет",
@@ -270,6 +273,161 @@ GENERIC_RETAIL_NOISE_KEYWORDS = [
     "ноутбук",
     "телевиз",
     "электроник",
+    "девайс",
+    "гаджет",
+]
+
+HOUSING_STRONG_KEYWORDS = [
+    "новостро",
+    "ипотек",
+    "жиль",
+    "квартир",
+    "отделк",
+    "ремонт квартиры",
+    "ремонт ванной",
+    "ванная комната",
+    "строитель",
+    "ввод жилья",
+]
+
+BELARUS_BUSINESS_KEYWORDS = [
+    "импорт",
+    "экспорт",
+    "пошлин",
+    "тамож",
+    "платеж",
+    "маркетплейс",
+    "ритейл",
+    "строй",
+    "жиль",
+    "ипотек",
+    "diy",
+    "сантех",
+]
+
+IMPORT_STRONG_KEYWORDS = [
+    "платеж",
+    "банк",
+    "комисси",
+    "тамож",
+    "пошлин",
+    "контейнер",
+    "фрахт",
+    "перевоз",
+    "логист",
+    "достав",
+    "склад",
+    "импортер",
+    "поставк",
+    "срок",
+    "расчет",
+]
+
+MARKETPLACE_ACTION_KEYWORDS = [
+    "продавц",
+    "селлер",
+    "комисси",
+    "тариф",
+    "страхов",
+    "логист",
+    "склад",
+    "постав",
+    "карточ",
+    "бейдж",
+    "подлинност",
+    "бренд проверен",
+    "доставк",
+]
+
+REGULATION_CONTEXT_KEYWORDS = [
+    "маркетплейс",
+    "продавц",
+    "селлер",
+    "импортер",
+    "импорт",
+    "товар",
+    "сертиф",
+    "поставк",
+    "локализ",
+    "производ",
+    "сантех",
+    "смесител",
+    "diy",
+]
+
+HARD_EXCLUDE_KEYWORDS = [
+    "кокаин",
+    "наркот",
+    "макрон",
+    "лесной пожар",
+    "гепатит",
+    "вич",
+    "экзаменацион",
+    "хореограф",
+    "певца кунгурова",
+    "быкова",
+    "долина",
+    "книг",
+    "спорт",
+    "футбол",
+    "психбольниц",
+    "дрон",
+    "бпла",
+    "джигурд",
+]
+
+FINANCE_NOISE_KEYWORDS = [
+    "акции",
+    "мосбирж",
+    "moex",
+    "ipo",
+    "инвестор",
+    "финансирован",
+]
+
+LEGAL_NOISE_KEYWORDS = [
+    "суд",
+    "иск",
+    "запретил",
+    "выплат",
+    "изображени",
+    "персональн",
+]
+
+TOPIC_KEYWORDS = [
+    "страхов",
+    "склад",
+    "бпла",
+    "бейдж",
+    "бренд проверен",
+    "комисси",
+    "тариф",
+    "платеж",
+    "тамож",
+    "пошлин",
+    "ремонт",
+    "отделк",
+    "новостро",
+    "ипотек",
+    "маркиров",
+    "локализ",
+    "сертифик",
+    "банкрот",
+    "ipo",
+]
+
+BRAND_KEYWORDS = [
+    "wildberries",
+    "ozon",
+    "яндекс маркет",
+    "лемана",
+    "леруа",
+    "петрович",
+    "всеинструменты",
+    "максидом",
+    "iddis",
+    "esko",
+    "rms",
 ]
 
 MANDATORY_SOURCES = {
@@ -282,6 +440,15 @@ MANDATORY_SOURCES = {
 
 ADDITIONAL_SOURCES = {
     "БЕЛТА": "https://belta.by/rss",
+}
+
+ENHANCEMENT_SOURCE_PAGES = {
+    "TPMag DIY & Household": "https://tpmag.ru/news/diy/",
+    "DIYNews pressa": "https://diynews.ru/pressa.aspx",
+    "Всеостройке.рф": "https://всеостройке.рф",
+    "ЕРЗ.РФ Новости": "https://erzrf.ru/news/",
+    "РБК Недвижимость": "https://realty.rbc.ru",
+    "New Retail": "https://new-retail.ru",
 }
 
 COMPETITOR_CHANNELS = {
@@ -321,6 +488,17 @@ class CompetitorSignal:
     why: str
 
 
+@dataclass
+class SupplementalSignal:
+    block: str
+    source: str
+    happened: str
+    why: str
+    action: str
+    published_at: str
+    url: str = ""
+
+
 def ensure_output_dirs() -> None:
     OUTPUT_DIR.mkdir(exist_ok=True)
     JSON_DIR.mkdir(parents=True, exist_ok=True)
@@ -345,6 +523,19 @@ def normalize_text(text: str) -> str:
 
 def slugify_date(dt: datetime) -> str:
     return dt.strftime("%Y-%m-%d")
+
+
+def format_weekly_period(run_date: datetime, lookback_hours: int) -> str:
+    period_days = max(1, lookback_hours // 24)
+    start_date = run_date - timedelta(days=period_days - 1)
+    return f"{start_date.strftime('%d.%m.%Y')}–{run_date.strftime('%d.%m.%Y')}"
+
+
+def period_bounds(run_date: datetime, lookback_hours: int) -> tuple[datetime, datetime]:
+    period_days = max(1, lookback_hours // 24)
+    max_dt = run_date.replace(hour=23, minute=59, second=59, microsecond=0)
+    min_dt = (run_date - timedelta(days=period_days - 1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    return min_dt, max_dt
 
 
 def parse_date(value: str) -> Optional[datetime]:
@@ -429,6 +620,96 @@ def has_arvad_context_anchor(text: str) -> bool:
     )
 
 
+def is_block_relevant(block: str, text: str) -> bool:
+    if has_regex_pattern(text, EXCLUDE_KEYWORDS):
+        return False
+    if has_regex_pattern(text, HARD_EXCLUDE_KEYWORDS):
+        return False
+    if has_regex_pattern(text, GENERIC_RETAIL_NOISE_KEYWORDS) and not has_product_anchor(text):
+        return False
+
+    if block == "Маркетплейсы и каналы":
+        return (
+            has_channel_anchor(text)
+            and count_keyword_hits(text, MARKETPLACE_ACTION_KEYWORDS) >= 1
+            and not has_regex_pattern(text, LEGAL_NOISE_KEYWORDS)
+            and not (
+                has_regex_pattern(text, FINANCE_NOISE_KEYWORDS)
+                and count_keyword_hits(text, MARKETPLACE_ACTION_KEYWORDS) < 2
+            )
+        )
+
+    if block == "Стройка, жильё и ремонт":
+        return count_keyword_hits(text, HOUSING_STRONG_KEYWORDS) >= 2 and not has_regex_pattern(
+            text,
+            [
+                "смартфон",
+                "ноутбук",
+                "девайс",
+                "гаджет",
+                "электроник",
+                "м\\.видео",
+                "эльдорад",
+                "белый дом",
+            ],
+        )
+
+    if block == "DIY ритейл":
+        return any(keyword in text for keyword in ["diy", "лемана", "леруа", "петрович", "максидом", "всеинструменты", "obi"])
+
+    if block == "Импорт, Китай, логистика и платежи":
+        return (
+            has_supply_anchor(text)
+            and ("китай" in text or "импорт" in text or "тамож" in text or "платеж" in text or "юан" in text)
+            and count_keyword_hits(text, IMPORT_STRONG_KEYWORDS) >= 2
+            and (
+                has_product_anchor(text)
+                or has_channel_anchor(text)
+                or "ритейл" in text
+                or "селлер" in text
+                or "поставщик" in text
+                or "производ" in text
+            )
+        )
+
+    if block == "Регулирование и локализация":
+        return (
+            any(
+                keyword in text
+                for keyword in ["гост", "локализ", "минпром", "сертифик", "регулирован", "поддержк", "маркиров"]
+            )
+            and count_keyword_hits(text, REGULATION_CONTEXT_KEYWORDS) >= 1
+            and has_arvad_context_anchor(text)
+        )
+
+    if block == "Беларусь":
+        return (
+            any(keyword in text for keyword in ["беларус", "минск", "еаэс", "belta", "право.by"])
+            and count_keyword_hits(text, BELARUS_BUSINESS_KEYWORDS) >= 1
+            and (
+                has_product_anchor(text)
+                or has_channel_anchor(text)
+                or has_supply_anchor(text)
+                or "ритейл" in text
+                or "строй" in text
+            )
+        )
+
+    return False
+
+
+def article_topic_key(article: Article, block: str) -> str:
+    haystack = f"{article.title} {article.snippet}".lower()
+    brand = next((keyword for keyword in BRAND_KEYWORDS if keyword in haystack), article.source.lower())
+    topic = next((keyword for keyword in TOPIC_KEYWORDS if keyword in haystack), article.theme)
+    if block == "Беларусь":
+        if "иран" in haystack:
+            topic = "iran"
+        elif "еаэс" in haystack:
+            topic = "еаэс"
+    return f"{block}:{brand}:{topic}"
+
+
 def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int:
     text = f"{title} {snippet}".lower()
     score = 0
@@ -481,7 +762,7 @@ def is_relevant(title: str, snippet: str) -> bool:
     return any(keyword in text for keyword in STRONG_KEEP_KEYWORDS) and has_arvad_context_anchor(text)
 
 
-def parse_rss(source: str, url: str, mandatory: bool, min_dt: datetime) -> list[Article]:
+def parse_rss(source: str, url: str, mandatory: bool, min_dt: datetime, max_dt: datetime) -> list[Article]:
     data = fetch_url(url)
     root = ET.fromstring(data)
     items = [node for node in root.iter() if node.tag.split("}")[-1] == "item"]
@@ -494,7 +775,7 @@ def parse_rss(source: str, url: str, mandatory: bool, min_dt: datetime) -> list[
         if not title or not link:
             continue
         dt = parse_date(pub_date)
-        if dt and dt < min_dt:
+        if dt and (dt < min_dt or dt > max_dt):
             continue
         score = score_article(source, title, snippet, mandatory)
         if score < 5 or not is_relevant(title, snippet):
@@ -576,16 +857,16 @@ def build_fx_forecast(history: list[dict[str, str]], code: str) -> str:
 
 
 def gather_articles(run_date: datetime, lookback_hours: int) -> list[Article]:
-    min_dt = run_date - timedelta(hours=lookback_hours)
+    min_dt, max_dt = period_bounds(run_date, lookback_hours)
     articles: list[Article] = []
     for source, url in MANDATORY_SOURCES.items():
         try:
-            articles.extend(parse_rss(source, url, True, min_dt))
+            articles.extend(parse_rss(source, url, True, min_dt, max_dt))
         except Exception as exc:
             print(f"Warning: failed to fetch mandatory source {source}: {exc}", file=sys.stderr)
     for source, url in ADDITIONAL_SOURCES.items():
         try:
-            articles.extend(parse_rss(source, url, False, min_dt))
+            articles.extend(parse_rss(source, url, False, min_dt, max_dt))
         except Exception as exc:
             print(f"Warning: failed to fetch additional source {source}: {exc}", file=sys.stderr)
 
@@ -596,7 +877,7 @@ def gather_articles(run_date: datetime, lookback_hours: int) -> list[Article]:
 
 
 def fetch_competitor_signals(run_date: datetime, lookback_hours: int) -> list[CompetitorSignal]:
-    min_dt = run_date - timedelta(hours=lookback_hours)
+    min_dt, max_dt = period_bounds(run_date, lookback_hours)
     signals: list[CompetitorSignal] = []
     pattern = re.compile(
         r'data-post="[^"]+".*?<div class="tgme_widget_message_text js-message_text"[^>]*>(.*?)</div>.*?<time datetime="([^"]+)"',
@@ -610,7 +891,7 @@ def fetch_competitor_signals(run_date: datetime, lookback_hours: int) -> list[Co
             continue
         for text_html, dt_raw in pattern.findall(html):
             dt = parse_date(dt_raw)
-            if not dt or dt < min_dt:
+            if not dt or dt < min_dt or dt > max_dt:
                 continue
             text = normalize_text(text_html)
             if not text:
@@ -634,6 +915,84 @@ def fetch_competitor_signals(run_date: datetime, lookback_hours: int) -> list[Co
         deduped.append(signal)
         seen[signal.source] = count + 1
     return deduped
+
+
+def classify_supplemental_block(text: str) -> Optional[str]:
+    haystack = text.lower()
+    if any(keyword in haystack for keyword in ["усн", "льготн", "минфин", "налог"]):
+        return "Регулирование и локализация"
+    if any(keyword in haystack for keyword in ["wb", "wildberries", "ozon", "маркетплейс", "категори", "выручк"]):
+        return "Маркетплейсы и каналы"
+    if any(keyword in haystack for keyword in ["тц", "трафик", "near-home", "районные", "локальной розницы", "молл"]):
+        return "DIY ритейл"
+    return None
+
+
+def load_supplemental_signals(run_date: datetime, lookback_hours: int) -> list[SupplementalSignal]:
+    if not PENDING_SIGNALS_PATH.exists():
+        return []
+    try:
+        text = PENDING_SIGNALS_PATH.read_text(encoding="utf-8")
+    except Exception as exc:
+        print(f"Warning: failed to read pending signals: {exc}", file=sys.stderr)
+        return []
+
+    min_dt, max_dt = period_bounds(run_date, lookback_hours)
+    target_period = format_weekly_period(run_date, lookback_hours)
+    sections = re.split(r"\n## ", text)
+    signals: list[SupplementalSignal] = []
+    for section in sections[1:]:
+        lines = section.strip().splitlines()
+        if not lines:
+            continue
+        heading = lines[0].strip()
+        if " — " not in heading:
+            continue
+        date_raw, title = heading.split(" — ", 1)
+        try:
+            dt = datetime.strptime(date_raw.strip(), "%Y-%m-%d").replace(tzinfo=LOCAL_TZ)
+        except ValueError:
+            continue
+        body = "\n".join(lines[1:])
+        week_match = re.search(r"- Для недели:\s*(.+)", body)
+        if week_match:
+            if week_match.group(1).strip() != target_period:
+                continue
+        elif dt < min_dt or dt > max_dt:
+            continue
+        if "Статус: pending" not in body:
+            continue
+
+        block_match = re.search(r"- Блок:\s*(.+)", body)
+        block = block_match.group(1).strip() if block_match else classify_supplemental_block(f"{title}\n{body}")
+        if not block:
+            continue
+
+        source_match = re.search(r"- Источник:\s*(.+)", body)
+        link_match = re.search(r"- Оригинальная ссылка:\s*(https?://\S+)", body)
+        visible_match = re.search(r"- Видимый сигнал:\s*(.+)", body)
+        angle_match = re.search(r"- Угол ARVAD:\s*(.+)", body)
+        if not angle_match:
+            angle_match = re.search(r"- Управленческий угол:\s*(.+)", body)
+        if not angle_match:
+            angle_match = re.search(r"- Для коллег:\s*(.+)", body)
+
+        source = source_match.group(1).strip() if source_match else "Ручной сигнал"
+        visible = visible_match.group(1).strip() if visible_match else title.strip()
+        angle = angle_match.group(1).strip() if angle_match else "Проверить влияние сигнала на продажи, каналы и ассортимент."
+        happened = f"Контекст ({dt.strftime('%d.%m.%Y')}): {visible}"
+        signals.append(
+            SupplementalSignal(
+                block=block,
+                source=f"{source} [ручной сигнал]",
+                happened=happened,
+                why=angle,
+                action=angle,
+                published_at=dt.strftime("%Y-%m-%d %H:%M"),
+                url=link_match.group(1).strip() if link_match else "",
+            )
+        )
+    return signals
 
 
 def article_why(theme: str) -> str:
@@ -726,17 +1085,17 @@ def select_main_articles(articles: list[Article]) -> list[Article]:
 def classify_article_block(article: Article) -> Optional[str]:
     haystack = f"{article.title} {article.snippet}".lower()
     if any(keyword in haystack for keyword in ["беларус", "минск", "belta", "еаэс", "брест", "право.by"]):
-        return "Беларусь"
+        return "Беларусь" if is_block_relevant("Беларусь", haystack) else None
     if any(keyword in haystack for keyword in ["wildberries", "ozon", "яндекс маркет", "маркетплейс", "селлер", "комисси", "карточ", "авито"]):
-        return "Маркетплейсы и каналы"
+        return "Маркетплейсы и каналы" if is_block_relevant("Маркетплейсы и каналы", haystack) else None
     if any(keyword in haystack for keyword in ["ипотек", "новостро", "ремонт", "отделк", "строитель", "жиль", "квартир", "дом"]):
-        return "Стройка, жильё и ремонт"
+        return "Стройка, жильё и ремонт" if is_block_relevant("Стройка, жильё и ремонт", haystack) else None
     if any(keyword in haystack for keyword in ["diy", "лемана", "леруа", "петрович", "максидом", "всеинструменты", "obi"]):
-        return "DIY ритейл"
+        return "DIY ритейл" if is_block_relevant("DIY ритейл", haystack) else None
     if any(keyword in haystack for keyword in ["китай", "юан", "cny", "импорт", "тамож", "пошлин", "платеж", "логист", "достав", "склад", "топлив", "перевоз"]):
-        return "Импорт, Китай, логистика и платежи"
+        return "Импорт, Китай, логистика и платежи" if is_block_relevant("Импорт, Китай, логистика и платежи", haystack) else None
     if any(keyword in haystack for keyword in ["гост", "локализ", "минпром", "сертифик", "регулирован", "поддержк", "маркиров", "российской полке", "налогооблож"]):
-        return "Регулирование и локализация"
+        return "Регулирование и локализация" if is_block_relevant("Регулирование и локализация", haystack) else None
     return None
 
 
@@ -755,6 +1114,7 @@ def article_to_signal(article: Article) -> dict[str, str]:
 def build_grouped_signals(articles: list[Article]) -> dict[str, list[dict[str, str]]]:
     grouped = {block: [] for block in BLOCK_QUOTAS}
     used_urls = set()
+    used_topics: dict[str, set[str]] = {block: set() for block in BLOCK_QUOTAS}
     ordered_articles = sorted(articles, key=lambda item: (item.score, item.published_at), reverse=True)
     for article in ordered_articles:
         if article.url in used_urls:
@@ -762,11 +1122,37 @@ def build_grouped_signals(articles: list[Article]) -> dict[str, list[dict[str, s
         block = classify_article_block(article)
         if not block:
             continue
+        topic_key = article_topic_key(article, block)
+        if topic_key in used_topics[block]:
+            continue
         if len(grouped[block]) >= BLOCK_QUOTAS[block]:
             continue
         grouped[block].append(article_to_signal(article))
         used_urls.add(article.url)
+        used_topics[block].add(topic_key)
     return grouped
+
+
+def merge_supplemental_signals(
+    grouped_signals: dict[str, list[dict[str, str]]],
+    supplemental_signals: list[SupplementalSignal],
+) -> dict[str, list[dict[str, str]]]:
+    by_block: dict[str, list[SupplementalSignal]] = {block: [] for block in BLOCK_QUOTAS}
+    for signal in supplemental_signals:
+        by_block.setdefault(signal.block, []).append(signal)
+    for block in BLOCK_QUOTAS:
+        if grouped_signals.get(block):
+            continue
+        for signal in by_block.get(block, [])[:1]:
+            grouped_signals[block].append(
+                {
+                    "source": signal.source,
+                    "happened": signal.happened,
+                    "why": signal.why,
+                    "action": signal.action,
+                }
+            )
+    return grouped_signals
 
 
 def flatten_grouped_signals(grouped_signals: dict[str, list[dict[str, str]]]) -> list[dict[str, str]]:
@@ -780,10 +1166,12 @@ def build_fallback_summary(
     articles: list[Article],
     competitor_signals: list[CompetitorSignal],
     run_date: datetime,
+    lookback_hours: int,
     rates: dict[str, str],
     fx_history: dict[str, list[dict[str, str]]],
 ) -> dict:
     grouped_signals = build_grouped_signals(articles)
+    grouped_signals = merge_supplemental_signals(grouped_signals, load_supplemental_signals(run_date, lookback_hours))
     selected_articles = flatten_grouped_signals(grouped_signals)
     dominant_themes = []
     for theme in ("marketplace", "logistics", "china", "housing", "regulation", "belarus", "design"):
@@ -826,7 +1214,7 @@ def build_fallback_summary(
         "Спрос по контуру ремонт/замена против первичного жилья.",
     ]
     return {
-        "title": f"ARVAD GROUP — weekly-сводка за {run_date.strftime('%d.%m.%Y')}",
+        "title": f"ARVAD GROUP — weekly-сводка за период {format_weekly_period(run_date, lookback_hours)}",
         "day_assessment": day_assessment,
         "main_signals": selected_articles,
         "grouped_signals": grouped_signals,
@@ -899,7 +1287,13 @@ def ensure_appendix(summary: dict, articles: list[Article], competitor_signals: 
     if "grouped_signals" not in summary:
         summary["grouped_signals"] = build_grouped_signals(articles)
     summary["main_signals"] = flatten_grouped_signals(summary["grouped_signals"])
-    summary["appendix_items"] = [asdict(article) for article in articles[:18]]
+    appendix_articles = []
+    for article in articles:
+        if classify_article_block(article):
+            appendix_articles.append(article)
+        if len(appendix_articles) >= 18:
+            break
+    summary["appendix_items"] = [asdict(article) for article in appendix_articles]
     summary["competitor_signals"] = [asdict(item) for item in competitor_signals[:8]]
     return summary
 
@@ -1078,8 +1472,8 @@ def render_markdown(summary: dict, articles: list[Article], competitor_signals: 
     for signal in competitor_signals:
         lines.append(f"- [{signal.source}] {signal.published_at} - {signal.summary}")
     lines.extend(["", "## Приложение: публикации"])
-    for article in articles:
-        lines.append(f"- [{article.source}] {article.published_at} - {article.title} - {article.url}")
+    for item in summary.get("appendix_items", []):
+        lines.append(f"- [{item['source']}] {item['published_at']} - {item['title']} - {item['url']}")
     return "\n".join(lines) + "\n"
 
 
@@ -1463,7 +1857,7 @@ def main():
 
     rates = fetch_cbr_rates_safe(run_date)
     fx_history = fetch_cbr_weekly_rates(run_date)
-    fallback = build_fallback_summary(articles, competitor_signals, run_date, rates, fx_history)
+    fallback = build_fallback_summary(articles, competitor_signals, run_date, args.lookback_hours, rates, fx_history)
     openai_summary, openai_status = call_openai(fallback, articles, competitor_signals)
     print(openai_status)
     summary = openai_summary or fallback

@@ -11,7 +11,7 @@ cd "$REPO_DIR"
 
 export PYTHONPYCACHEPREFIX="$REPO_DIR/tmp/pycache"
 export ARVAD_BITRIX_WEBHOOK_URL="${ARVAD_BITRIX_WEBHOOK_URL:-https://team.arvad.ru/rest/5/ib6qhmme92wgyqed/}"
-export ARVAD_BITRIX_DIALOG_ID="${ARVAD_BITRIX_DIALOG_ID:-chat4071}"
+export ARVAD_BITRIX_DIALOG_ID="${ARVAD_BITRIX_DIALOG_ID:-5}"
 
 mkdir -p "$REPO_DIR/output/html" "$REPO_DIR/output/json" "$REPO_DIR/output/markdown" "$REPO_DIR/tmp/pycache"
 

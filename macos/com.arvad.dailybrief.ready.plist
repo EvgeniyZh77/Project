@@ -8,7 +8,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>/Users/evgeniyzhuravlev/Yandex.Disk.localized/+Project/automation/arvad-weekly-brief/macos/run_arvad_weekly_brief.sh</string>
+    <string>__PROJECT_DIR__/automation/arvad-weekly-brief/macos/run_arvad_weekly_brief.sh</string>
   </array>
 
   <key>StartCalendarInterval</key>

@@ -16,7 +16,7 @@
 
 `Variables`
 
-- `ARVAD_BITRIX_DIALOG_ID=chat4071`
+- `ARVAD_BITRIX_DIALOG_ID=5`
 - `OPENAI_MODEL=gpt-5`
 
 5. Открыть `Actions -> ARVAD Weekly Market Brief`.
@@ -25,7 +25,7 @@
 ## Что проверить после первого запуска
 
 - Появился ли новый HTML в `Artifacts`.
-- Ушёл ли HTML в Bitrix24 чат `ТОП-менеджмент`.
+- Ушёл ли HTML в Bitrix24 чат `Заметки`.
 - Сохранились ли свежие файлы в `output/`.
 
 ## Важно

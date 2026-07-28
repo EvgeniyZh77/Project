@@ -17,6 +17,10 @@
 - `requirements.txt` - зависимости Python.
 - `macos/` - локальные сценарии запуска на Mac, если нужен резервный вариант помимо GitHub.
 
+## Выпуски
+
+- [arvad-market-brief-2026-07-07.md](output/markdown/arvad-market-brief-2026-07-07.md) — Markdown-выпуск weekly-сводки.
+
 ## Что настроить в GitHub
 
 Добавить `Secrets`:
@@ -27,7 +31,7 @@
 Добавить `Variables`:
 
 - `ARVAD_BITRIX_DIALOG_ID`
-  Значение: `chat4071`
+  Значение: `5`
 - `OPENAI_MODEL`
   Значение по умолчанию: `gpt-5`
 
@@ -47,7 +51,7 @@ python3 scripts/build_arvad_market_brief.py --lookback-hours 168
 
 ```bash
 export ARVAD_BITRIX_WEBHOOK_URL='https://team.arvad.ru/rest/.../'
-export ARVAD_BITRIX_DIALOG_ID='chat4071'
+export ARVAD_BITRIX_DIALOG_ID='5'
 python3 scripts/build_arvad_market_brief.py --lookback-hours 168 --send-bitrix
 ```
 
