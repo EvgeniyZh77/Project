@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARVAD GROUP — weekly-сводка за период 28.07.2026–03.08.2026</title>
+  <style>
+    :root {
+      --blue: #0c4d8a;
+      --text: #2f3640;
+      --muted: #65707c;
+      --line: #d7e0ea;
+      --bg: #eef3f7;
+      --panel: #ffffff;
+      --chip: #edf4fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+    }
+    .deck {
+      width: min(1560px, calc(100vw - 36px));
+      margin: 18px auto 36px;
+    }
+    .slide {
+      min-height: 860px;
+      background: var(--panel);
+      margin-bottom: 22px;
+      padding: 40px 54px 44px;
+      box-shadow: 0 14px 36px rgba(28, 48, 73, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--line);
+    }
+    .brand {
+      color: var(--blue);
+      font-size: 34px;
+      line-height: 0.95;
+      font-weight: 500;
+    }
+    .meta {
+      max-width: 520px;
+      font-size: 16px;
+      line-height: 1.45;
+      color: var(--muted);
+      text-align: right;
+    }
+    .title {
+      font-size: 42px;
+      line-height: 1.08;
+      color: var(--blue);
+      margin: 0;
+    }
+    .subtitle {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.45;
+    }
+    .grid-2, .grid-4 {
+      display: grid;
+      gap: 16px;
+    }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .panel {
+      border: 1px solid var(--line);
+      padding: 18px 20px;
+      background: #fff;
+    }
+    .panel h3 {
+      margin: 0 0 12px;
+      font-size: 17px;
+      color: var(--blue);
+    }
+    .quota {
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 14px;
+    }
+    .metric .label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .metric .value {
+      font-size: 34px;
+      line-height: 1;
+      color: var(--blue);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .metric .desc {
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+    li + li { margin-top: 8px; }
+    a { color: var(--blue); text-decoration: none; }
+    .chart-wrap {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .chart-note {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    @media (max-width: 1200px) {
+      .slide { min-height: auto; padding: 28px; }
+      .grid-2, .grid-4, .chart-wrap { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; gap: 14px; }
+      .meta { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand">Arvad<br>Group</div>
+        <div class="meta">Еженедельная сводка для топ-менеджмента. Формат: HTML. Отправка в Bitrix24. Время запуска: понедельник 07:30, Екатеринбург.</div>
+      </div>
+      <h1 class="title">ARVAD GROUP — weekly-сводка за период 28.07.2026–03.08.2026</h1>
+      <p class="subtitle">Сигналов достаточно: маркетплейсы (платежи, антифрод, логистика WB), конкуренты (агрессивные скидки в смесителях). По Китаю и Беларуси прямых новостей мало — держим фокус на FX и расчетах.</p>
+      <div class="grid-4">
+        <div class="panel metric"><div class="label">Фокус</div><div class="value">WB</div><div class="desc">Комиссии, карточки, unit economics.</div></div>
+        <div class="panel metric"><div class="label">Спрос</div><div class="value">2</div><div class="desc">Отдельно: новостройки и ремонт/замена.</div></div>
+        <div class="panel metric"><div class="label">Валюты</div><div class="value">USD/CNY</div><div class="desc">Источник: ЦБ РФ. Дата: 03.08.2026. USD/RUB: 79,4637. CNY/RUB: 11,7694. Динамика недели: USD/RUB +1,9%, CNY/RUB +2,1%. Прогноз (инерционный): умеренный рост. Действие: не затягивать платежи в CNY, проверить валютную маржу и прайс-карты импорта из Китая.</div></div>
+        <div class="panel metric"><div class="label">Конкуренты</div><div class="value">6</div><div class="desc">Открытые сигналы из Telegram и других публичных каналов.</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Что проверить сегодня</h3>
+          <ul><li>Пересчитать цены и промо на WB/Ozon по топ-50 SKU смесителей с учетом акции ESKO.</li><li>Проверить остатки и отгрузки на склады WB; при необходимости переадресовать сток на альтернативные хабы/Ozon.</li><li>Провести экспресс-аудит KYC/документов продавца и настроек безопасности аккаунтов (2FA, доступы).</li><li>Зафиксировать платежи поставщикам в Китае на 5–7 дней и обновить валютный калькулятор себестоимости.</li><li>Подготовить шаблоны прозрачных промо-условий и пакет фото/видео-отчетности для B2B-объектов.</li></ul>
+        </div>
+        <div class="panel">
+          <h3>Сигналы для наблюдения</h3>
+          <ul><li>Решения по закону о платформенной экономике: антифрод, холды выплат, требования к продавцам.</li><li>Последствия инцидента на складе WB: перераспределение потоков, SLA и штрафная политика.</li><li>Ценовая активность ESKO/RMS/IDDIS в смесителях на маркетплейсах и частота промо.</li><li>Беларусь/ЕАЭС: новости по платежам, сертификации и логистике Китай–РФ–РБ.</li></ul>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Курс валют: динамика за неделю и прогноз</h3>
+        <p class="subtitle">Источник: ЦБ РФ. Дата: 03.08.2026. USD/RUB: 79,4637. CNY/RUB: 11,7694. Динамика недели: USD/RUB +1,9%, CNY/RUB +2,1%. Прогноз (инерционный): умеренный рост. Действие: не затягивать платежи в CNY, проверить валютную маржу и прайс-карты импорта из Китая.</p>
+        <div class="chart-wrap">
+          <div>
+            <h3>USD/RUB</h3>
+            <div class="chart-note">Недостаточно данных для графика.</div>
+            <div class="chart-note"></div>
+          </div>
+          <div>
+            <h3>CNY/RUB</h3>
+            <div class="chart-note">Недостаточно данных для графика.</div>
+            <div class="chart-note"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand">Arvad<br>Group</div>
+        <div class="meta">Главные weekly-сигналы из обязательных и дополнительных источников.</div>
+      </div>
+      
+            <div class="panel">
+              <h3>Маркетплейсы и каналы <span class="quota">до 4</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  
+                <tr>
+                  <td>Retailer.ru</td>
+                  <td>Также компания поставила на паузу переговоры о приобретении новых активов. Сообщение Wildberries приостановила инвестпрограмму ради поддержки селлеров появились сначала на RETAILER.ru .</td>
+                  <td>Это влияет на маржу и управляемость продаж на маркетплейсах, где для ARVAD важны цены, промо и unit economics по смесителям.</td>
+                  <td>Пересчитать цены, комиссии и промо по ключевым SKU на маркетплейсах и проверить, где нужна коррекция ассортимента.</td>
+                </tr>
+                
+                <tr>
+                  <td>Интерфакс</td>
+                  <td>На логистическом объекте Wildberries во Владимирской области произошло возгорание из-за атаки, сообщила Wildberries-Russ.&quot;На месте работают пожарные расчеты.</td>
+                  <td>Это прямой риск для исполнения поставок, доступности товара и штрафов со стороны клиентов или площадок.</td>
+                  <td>Проверить SLA перевозчиков, запасы по ходовым SKU и риски задержек на ближайшие 1-2 недели.</td>
+                </tr>
+                
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>Стройка, жильё и ремонт <span class="quota">до 5</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4">Существенных сигналов за период не выделено.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>DIY ритейл <span class="quota">до 5</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4">Существенных сигналов за период не выделено.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>Импорт, Китай, логистика и платежи <span class="quota">до 4</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4">Существенных сигналов за период не выделено.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>Регулирование и локализация <span class="quota">до 4</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  
+                <tr>
+                  <td>Коммерсантъ</td>
+                  <td>В храме Василия Блаженного на Красной площади произошло возгорание, сообщили оперативные службы ТАСС. В настоящий момент пожар локализован.</td>
+                  <td>Это может перейти в новые требования к локализации, документации, материалам или тендерам.</td>
+                  <td>Проверить, нужны ли обновления в документации, локализации, упаковке или входных спецификациях клиентов.</td>
+                </tr>
+                
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>Беларусь <span class="quota">до 3</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4">Существенных сигналов за период не выделено.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand">Arvad<br>Group</div>
+        <div class="meta">Открытые соцсети конкурентов. Если public-feed недоступен, это тоже фиксируется как сигнал по качеству внешнего контура.</div>
+      </div>
+      <div class="panel">
+        <h3>Конкуренты: публичные сигналы</h3>
+        <table>
+          <thead>
+            <tr><th>Источник</th><th>Дата</th><th>Содержание</th><th>Почему важно</th></tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td>ESKO Telegram</td>
+              <td>2026-08-01 11:56</td>
+              <td>Федеральная акция августа В августовской акции участвуют 208 товаров ESKO и VODA со скидками до 60%: смесители для кухни, умывальника, ванны и душа, душевые системы, гигиенические души и аксессуары. Наиболее выгодные предложения ESKO: — смеситель для душа PG80BR — 5 080 ₽ вместо 12 700 ₽, скидка 60%; — смеситель для кухни FRS519W — 2 035 ₽ вместо 5 080 ₽, скидка 59%; — смесители для кухни TW519B и TW519W — 3 750 ₽ вм</td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: акции, новые коллекции, сервисные новости.</td>
+            </tr>
+            
+            <tr>
+              <td>RMS Telegram</td>
+              <td>2026-07-31 12:11</td>
+              <td>☀️ Дача — не повод отказываться от удобства Согласитесь, летний душ должен быть и удобным, и красивым. Чтобы после жаркого дня на участке не приходилось устраивать ритуал с тазиками, вёдрами и шлангом через полдвора. Хочется просто зайти, включить воду и освежиться после грядок, купания в бассейне или долгого дня на свежем воздухе. Душевые стойки РМС из высокопрочного пластика лёгкие в уходе, подходят для сезонного и</td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: монтаж, product education, трафик в маркетплейсы.</td>
+            </tr>
+            
+            <tr>
+              <td>IDDIS Telegram</td>
+              <td>2026-07-30 14:15</td>
+              <td>Баланс формы, комфорта и практичности ✨ 🚽 Представляем новинку — подвесной унитаз IDDIS ® Клауд Икс (Cloud X) . Модель поддерживает актуальные интерьерные тенденции без сложностей в уходе и эксплуатации. ✔️ Безободковая чаша из санитарного фарфора помогает сохранять чистоту. Благодаря минимальному водопоглощению поверхность не впитывает загрязнения и запахи. Система смыва «торнадо» равномерно омывает чашу по кругу, а</td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: дизайн и комплектные интерьерные решения.</td>
+            </tr>
+            
+            <tr>
+              <td>ESKO Telegram</td>
+              <td>2026-07-29 20:27</td>
+              <td>Смеситель скрытого монтажа с гигиеническим душем SMH05 Да, вот так ручка упирается в лейку при открытии. Не баг, а фича. Знаете зачем?</td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: акции, новые коллекции, сервисные новости.</td>
+            </tr>
+            
+            <tr>
+              <td>RMS Telegram</td>
+              <td>2026-07-29 14:08</td>
+              <td>Аэратор на смесителе РМС не откручивается? Возможно, Вы просто крутите не в ту сторону. Спойлер: если смотреть на смеситель сверху, откручивать нужно по часовой стрелке. Показываем, как не повредить покрытие и что важно знать, если вы хотите заменить внутреннюю часть аэратора. А вы когда-нибудь чистили аэратор на своём смесителе? ↪️ Подписывайтесь на нас в МАХ | ВК | Дзен</td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: монтаж, product education, трафик в маркетплейсы.</td>
+            </tr>
+            
+            <tr>
+              <td>IDDIS Telegram</td>
+              <td>2026-07-28 16:04</td>
+              <td>В этом пространстве будто застыло тихое утро 🤍 Ванная комната 8,1 м² от дизайнера Марии Софроновой – место, где современная эстетика встречается с ощущением спокойствия. Прохладные оттенки бетона, невесомая подсветка и сияние металла создают гармоничный баланс между минимализмом и уютом ✨ 🚽 Подвесной унитаз IDDIS ® Калипсо (Calipso) привлекает выверенной формой и аккуратным исполнением. Безободковая чаша помогает под</td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: дизайн и комплектные интерьерные решения.</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand">Arvad<br>Group</div>
+        <div class="meta">Приложение: публикации, из которых собран weekly-pass.</div>
+      </div>
+      <div class="panel">
+        <h3>Приложение: публикации</h3>
+        <table>
+          <thead>
+            <tr><th>Источник</th><th>Дата</th><th>Заголовок</th><th>Фрагмент</th></tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td>Retailer.ru</td>
+              <td>2026-07-31 17:33</td>
+              <td><a href="https://retailer.ru/wildberries-priostanovila-investprogrammu-radi-podderzhki-sellerov/">Wildberries приостановила инвестпрограмму ради поддержки селлеров</a></td>
+              <td>Также компания поставила на паузу переговоры о приобретении новых активов. Сообщение Wildberries приостановила инвестпрограмму ради поддержки селлеров появились сначала на RETAILER.ru .</td>
+            </tr>
+            
+            <tr>
+              <td>Интерфакс</td>
+              <td>2026-08-03 10:18</td>
+              <td><a href="https://www.interfax.ru/russia/1107119">Склад Wildberries во Владимирской области загорелся из-за атаки</a></td>
+              <td>На логистическом объекте Wildberries во Владимирской области произошло возгорание из-за атаки, сообщила Wildberries-Russ.&quot;На месте работают пожарные расчеты.</td>
+            </tr>
+            
+            <tr>
+              <td>РБК</td>
+              <td>2026-08-03 09:54</td>
+              <td><a href="https://www.rbc.ru/politics/03/08/2026/6a701eb99a7947767cb77878">ВСУ атаковали склад Wildberries во Владимирской области</a></td>
+              <td>В результате атаки на склад Wildberries есть разрушения, людей из помещений эвакуировали. Логистические цепочки перестроены, уточнили в компании</td>
+            </tr>
+            
+            <tr>
+              <td>Интерфакс</td>
+              <td>2026-08-03 09:55</td>
+              <td><a href="https://www.interfax.ru/russia/1107114">Беспилотники атаковали складской комплекс Wildberries во Владимирской области</a></td>
+              <td>На территории объекта возник пожар</td>
+            </tr>
+            
+            <tr>
+              <td>Коммерсантъ</td>
+              <td>2026-08-02 10:23</td>
+              <td><a href="https://www.kommersant.ru/doc/8860767">После атаки ВСУ на склад Wildberries в Самарской области начался пожар</a></td>
+              <td>Беспилотники ВСУ нанесли удар по складу Wildberries в Самарской области. Об этом сообщил губернатор региона Вячеслав Федорищев в Telegram.</td>
+            </tr>
+            
+            <tr>
+              <td>Коммерсантъ</td>
+              <td>2026-08-01 03:59</td>
+              <td><a href="https://www.kommersant.ru/doc/8860533">В храме Василия Блаженного на Красной площади произошел пожар</a></td>
+              <td>В храме Василия Блаженного на Красной площади произошло возгорание, сообщили оперативные службы ТАСС. В настоящий момент пожар локализован.</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
