@@ -24,6 +24,7 @@ MD_DIR = OUTPUT_DIR / "markdown"
 HTML_DIR = OUTPUT_DIR / "html"
 CACHE_DIR = BASE_DIR / "cache"
 LATEST_CACHE_PATH = CACHE_DIR / "latest_success.json"
+BITRIX_DELIVERY_LOG_PATH = CACHE_DIR / "bitrix_delivery_log.json"
 PENDING_SIGNALS_PATH = BASE_DIR / "input" / "pending_signals.md"
 LOCAL_TZ = timezone(timedelta(hours=5))
 
@@ -360,6 +361,8 @@ HARD_EXCLUDE_KEYWORDS = [
     "наркот",
     "макрон",
     "лесной пожар",
+    "пожар в соборе",
+    "собор",
     "гепатит",
     "вич",
     "экзаменацион",
@@ -1378,6 +1381,42 @@ def load_latest_cache() -> Optional[dict]:
         return None
 
 
+def load_bitrix_delivery_log() -> dict:
+    if not BITRIX_DELIVERY_LOG_PATH.exists():
+        return {}
+    try:
+        return json.loads(BITRIX_DELIVERY_LOG_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(f"Warning: failed to read Bitrix delivery log: {exc}", file=sys.stderr)
+        return {}
+
+
+def save_bitrix_delivery_log(payload: dict) -> None:
+    BITRIX_DELIVERY_LOG_PATH.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def build_delivery_key(run_date: datetime, lookback_hours: int, dialog_id: str) -> str:
+    return f"{run_date.strftime('%Y-%m-%d')}|{lookback_hours}|{dialog_id}"
+
+
+def was_already_delivered(run_date: datetime, lookback_hours: int, dialog_id: str) -> bool:
+    payload = load_bitrix_delivery_log()
+    key = build_delivery_key(run_date, lookback_hours, dialog_id)
+    return key in payload
+
+
+def mark_delivered(run_date: datetime, lookback_hours: int, dialog_id: str, message_id: str) -> None:
+    payload = load_bitrix_delivery_log()
+    payload[build_delivery_key(run_date, lookback_hours, dialog_id)] = {
+        "delivered_at": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
+        "message_id": str(message_id),
+    }
+    save_bitrix_delivery_log(payload)
+
+
 def build_offline_summary(run_date: datetime, cached_payload: Optional[dict]) -> tuple[dict, list[Article], list[CompetitorSignal]]:
     if cached_payload:
         cached_summary = dict(cached_payload.get("summary") or {})
@@ -1870,8 +1909,13 @@ def main():
             print("Warning: ARVAD_BITRIX_WEBHOOK_URL is not set, skipping Bitrix24 delivery.", file=sys.stderr)
         else:
             try:
-                result = send_html_to_bitrix(outputs["html"], webhook, BITRIX_DIALOG_ID)
-                print(f"bitrix_message_id: {result['commit']['result']['MESSAGE_ID']}")
+                if was_already_delivered(run_date, args.lookback_hours, BITRIX_DIALOG_ID):
+                    print("bitrix_delivery_skipped: already delivered for this period")
+                else:
+                    result = send_html_to_bitrix(outputs["html"], webhook, BITRIX_DIALOG_ID)
+                    message_id = result["commit"]["result"]["MESSAGE_ID"]
+                    mark_delivered(run_date, args.lookback_hours, BITRIX_DIALOG_ID, message_id)
+                    print(f"bitrix_message_id: {message_id}")
             except Exception as exc:
                 print(f"Warning: failed to send HTML to Bitrix24: {exc}", file=sys.stderr)
 

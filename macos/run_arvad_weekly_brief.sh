@@ -32,6 +32,10 @@ if ! /usr/bin/curl --head --silent --fail --max-time 15 https://www.cbr.ru/ >/de
   exit 0
 fi
 
-python3 scripts/build_arvad_market_brief.py --lookback-hours 168 --send-bitrix
+if [ "${ARVAD_LOCAL_SEND_BITRIX:-0}" = "1" ]; then
+  python3 scripts/build_arvad_market_brief.py --lookback-hours 168 --send-bitrix
+else
+  python3 scripts/build_arvad_market_brief.py --lookback-hours 168
+fi
 
 echo "$LOG_PREFIX done"
