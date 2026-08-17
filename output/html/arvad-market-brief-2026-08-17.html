@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARVAD GROUP — weekly-сводка за период 11.08.2026–17.08.2026</title>
+  <style>
+    :root {
+      --blue: #0c4d8a;
+      --text: #2f3640;
+      --muted: #65707c;
+      --line: #d7e0ea;
+      --bg: #eef3f7;
+      --panel: #ffffff;
+      --chip: #edf4fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+    }
+    .deck {
+      width: min(1560px, calc(100vw - 36px));
+      margin: 18px auto 36px;
+    }
+    .slide {
+      min-height: 860px;
+      background: var(--panel);
+      margin-bottom: 22px;
+      padding: 40px 54px 44px;
+      box-shadow: 0 14px 36px rgba(28, 48, 73, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--line);
+    }
+    .brand {
+      color: var(--blue);
+      font-size: 34px;
+      line-height: 0.95;
+      font-weight: 500;
+    }
+    .meta {
+      max-width: 520px;
+      font-size: 16px;
+      line-height: 1.45;
+      color: var(--muted);
+      text-align: right;
+    }
+    .title {
+      font-size: 42px;
+      line-height: 1.08;
+      color: var(--blue);
+      margin: 0;
+    }
+    .subtitle {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.45;
+    }
+    .grid-2, .grid-4 {
+      display: grid;
+      gap: 16px;
+    }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .panel {
+      border: 1px solid var(--line);
+      padding: 18px 20px;
+      background: #fff;
+    }
+    .panel h3 {
+      margin: 0 0 12px;
+      font-size: 17px;
+      color: var(--blue);
+    }
+    .quota {
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 14px;
+    }
+    .metric .label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .metric .value {
+      font-size: 34px;
+      line-height: 1;
+      color: var(--blue);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .metric .desc {
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+    li + li { margin-top: 8px; }
+    a { color: var(--blue); text-decoration: none; }
+    .chart-wrap {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .chart-note {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    @media (max-width: 1200px) {
+      .slide { min-height: auto; padding: 28px; }
+      .grid-2, .grid-4, .chart-wrap { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; gap: 14px; }
+      .meta { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand">Arvad<br>Group</div>
+        <div class="meta">Еженедельная сводка для топ-менеджмента. Формат: HTML. Отправка в Bitrix24. Время запуска: понедельник 07:30, Екатеринбург.</div>
+      </div>
+      <h1 class="title">ARVAD GROUP — weekly-сводка за период 11.08.2026–17.08.2026</h1>
+      <p class="subtitle">Неделя насыщенная по релевантным сигналам: маркетплейсы (инцидент WB), логистика/импорт (ЭПД, ДОПП/СПОТ, склады КЗ), регуляторика (РОП/эко‑сбор). По Беларуси прямых новостей мало — держим мониторинг.</p>
+      <div class="grid-4">
+        <div class="panel metric"><div class="label">Фокус</div><div class="value">WB</div><div class="desc">Комиссии, карточки, unit economics.</div></div>
+        <div class="panel metric"><div class="label">Спрос</div><div class="value">2</div><div class="desc">Отдельно: новостройки и ремонт/замена.</div></div>
+        <div class="panel metric"><div class="label">Валюты</div><div class="value">USD/CNY</div><div class="desc">ЦБ РФ на 17.08.2026: USD/RUB 84,54 (+2,3% неделя), CNY/RUB 12,48 (+1,8% неделя). Прогноз: инерционно вверх; не тянуть с платежами в CNY/USD и проверить валютную маржу.</div></div>
+        <div class="panel metric"><div class="label">Конкуренты</div><div class="value">4</div><div class="desc">Открытые сигналы из Telegram и других публичных каналов.</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Что проверить сегодня</h3>
+          <ul><li>WB: проверить статусы FBO/FBS и штрафные риски, запустить переотправки и перераспределение остатков по топ‑SKU.</li><li>ЭПД: провести контрольный прогон отгрузки с ЭПД по двум каналам (DIY и МП), закрыть интеграционные гапы.</li><li>ВЭД: созвон с брокером — обновить СОП по ДОПП/СПОТ и внедрить двойной контроль на этапе оформления.</li><li>РОП: сверка отчётности и договоров на утилизацию упаковки; актуализировать ставки в калькуляции цен.</li><li>Продукт: бенчмарк IDDIS Spin и черновое ТЗ на ARVAD‑решение/бандл с фильтром; оценка P&amp;L.</li></ul>
+        </div>
+        <div class="panel">
+          <h3>Сигналы для наблюдения</h3>
+          <ul><li>Платежи с Китаем: курс CNY/RUB, комиссии и сроки прохождения платежей.</li><li>Политика комиссий/логистики WB и Ozon после инцидента, SLA ФЦ и изменения FBO/FBS.</li><li>ЕАЭС/Беларусь: сертификация, импортные процедуры и расчёты.</li><li>Ставки и доступность 3PL/складов по коридору Китай—Казахстан—РФ; возможные ограничения.</li></ul>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Курс валют: динамика за неделю и прогноз</h3>
+        <p class="subtitle">ЦБ РФ на 17.08.2026: USD/RUB 84,54 (+2,3% неделя), CNY/RUB 12,48 (+1,8% неделя). Прогноз: инерционно вверх; не тянуть с платежами в CNY/USD и проверить валютную маржу.</p>
+        <div class="chart-wrap">
+          <div>
+            <h3>USD/RUB</h3>
+            <div class="chart-note">Недостаточно данных для графика.</div>
+            <div class="chart-note"></div>
+          </div>
+          <div>
+            <h3>CNY/RUB</h3>
+            <div class="chart-note">Недостаточно данных для графика.</div>
+            <div class="chart-note"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand">Arvad<br>Group</div>
+        <div class="meta">Главные weekly-сигналы из обязательных и дополнительных источников.</div>
+      </div>
+      
+            <div class="panel">
+              <h3>Маркетплейсы и каналы <span class="quota">до 4</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  
+                <tr>
+                  <td>Коммерсантъ</td>
+                  <td>К тушению возгорания на территории логистического комплекса Wildberries в подмосковном Подольске привлекли 56 пожарных и 14 автоцистерн. Об этом рассказал глава городского округа Григорий Артамонов в Telegram.</td>
+                  <td>Это прямой риск для исполнения поставок, доступности товара и штрафов со стороны клиентов или площадок.</td>
+                  <td>Проверить SLA перевозчиков, запасы по ходовым SKU и риски задержек на ближайшие 1-2 недели.</td>
+                </tr>
+                
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>Стройка, жильё и ремонт <span class="quota">до 5</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4">Существенных сигналов за период не выделено.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>DIY ритейл <span class="quota">до 5</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4">Существенных сигналов за период не выделено.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>Импорт, Китай, логистика и платежи <span class="quota">до 4</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4">Существенных сигналов за период не выделено.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>Регулирование и локализация <span class="quota">до 4</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  
+                <tr>
+                  <td>Retail.ru</td>
+                  <td>С 1 сентября 2026 года в рабочем режиме начнет действовать механизм автоматического формирования постановлений по делам об административных правонарушениях на основе данных системы маркировки, пишет buh.ru . Соответствующие поправки в КоАП РФ внес федеральный закон от 02.05.2026 № 120-ФЗ . Источник: Retail.ru Новые положения предусматривают, что администрати</td>
+                  <td>Это может перейти в новые требования к локализации, документации, материалам или тендерам.</td>
+                  <td>Проверить, нужны ли обновления в документации, локализации, упаковке или входных спецификациях клиентов.</td>
+                </tr>
+                
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="panel">
+              <h3>Беларусь <span class="quota">до 3</span></h3>
+              <table>
+                <thead>
+                  <tr><th>Источник</th><th>Что произошло</th><th>Почему важно</th><th>Что делать</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4">Существенных сигналов за период не выделено.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand">Arvad<br>Group</div>
+        <div class="meta">Открытые соцсети конкурентов. Если public-feed недоступен, это тоже фиксируется как сигнал по качеству внешнего контура.</div>
+      </div>
+      <div class="panel">
+        <h3>Конкуренты: публичные сигналы</h3>
+        <table>
+          <thead>
+            <tr><th>Источник</th><th>Дата</th><th>Содержание</th><th>Почему важно</th></tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td>RMS Telegram</td>
+              <td>2026-08-14 12:36</td>
+              <td>⏹ Попасть в тренд — значит заметить его раньше других Мы не раз замечали, что наши цветовые решения совпадают с большими визуальными трендами — в том числе с направлениями Apple и Pantone. Для нас это не про погоню за модой, а про внимательность к тому, как меняются интерьеры, материалы и вкус покупателей. С 13 по 16 августа проходит VIII Московская неделя интерьера и дизайна – событие, где встречаются мебель, свет, </td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: монтаж, product education, трафик в маркетплейсы.</td>
+            </tr>
+            
+            <tr>
+              <td>RMS Telegram</td>
+              <td>2026-08-13 15:03</td>
+              <td>🏠 Давно не писали про устойчивое развитие Обычно в наших каналах мы рассказываем об ассортименте, новинках, интересных решениях для ванной и кухни. При этом нам интересно смотреть шире: какие темы становятся важными для компаний, как меняется бизнес и что сегодня вкладывают в понятие ответственного развития. Недавно мы увидели статью КОД ESG - профессионального сообщества, которое объединяет специалистов по устойчиво</td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: монтаж, product education, трафик в маркетплейсы.</td>
+            </tr>
+            
+            <tr>
+              <td>IDDIS Telegram</td>
+              <td>2026-08-13 12:03</td>
+              <td>Новинка, которая переворачивает представление о кухонном смесителе 💫 🆕 🚰 IDDIS ® Спин (Spin) создан для тех, кто ценит порядок, технологичность и стиль в каждой детали. Его инновационный дизайн добавляет комфорта, а высокий излив позволяет мыть даже самую массивную посуду 🍽 Главные фишки технологичной новинки: 💧 Встроенный канал для фильтрованной воды – наслаждайтесь чистой водой прямо из-под крана (осталось приобрес</td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: дизайн и комплектные интерьерные решения.</td>
+            </tr>
+            
+            <tr>
+              <td>ESKO Telegram</td>
+              <td>2026-08-11 20:50</td>
+              <td>Любите ли вы термостаты так, как люблю их я? А ещё я люблю, когда они исправно работают весь отведённый им срок службы — 15 лет. Но ресурс термостатического смесителя сильно зависит от качества воды. Песок, ржавчина, известковый налёт и другие примеси постепенно засоряют внутренние элементы и мешают термостату точно поддерживать заданную температуру. Поэтому настоятельно рекомендую устанавливать систему фильтрации на</td>
+              <td>Открытый канал конкурента показывает, как он использует digital-контур: акции, новые коллекции, сервисные новости.</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar">
+        <div class="brand">Arvad<br>Group</div>
+        <div class="meta">Приложение: публикации, из которых собран weekly-pass.</div>
+      </div>
+      <div class="panel">
+        <h3>Приложение: публикации</h3>
+        <table>
+          <thead>
+            <tr><th>Источник</th><th>Дата</th><th>Заголовок</th><th>Фрагмент</th></tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td>Retail.ru</td>
+              <td>2026-08-13 18:40</td>
+              <td><a href="https://www.retail.ru/news/s-1-sentyabrya-2026-goda-nachnet-rabotu-sistema-avtoshtrafov-za-narusheniya-pri--13-avgusta-2026-281010/">С 1 сентября 2026 года начнет работу система автоштрафов за нарушения при продаже маркированных товаров</a></td>
+              <td>С 1 сентября 2026 года в рабочем режиме начнет действовать механизм автоматического формирования постановлений по делам об административных правонарушениях на основе данных системы маркировки, пишет buh.ru . Соответствующие поправки в КоАП РФ внес федеральный закон от 02.05.2026 № 120-ФЗ . Источник: Retail.ru Новые положения предусматривают, что административные нарушения могут фиксироваться по данным «Честного знака</td>
+            </tr>
+            
+            <tr>
+              <td>Коммерсантъ</td>
+              <td>2026-08-16 12:41</td>
+              <td><a href="https://www.kommersant.ru/doc/8890654">Пожар на складе Wildberries в Подольске тушат 56 пожарных // К тушению пожара на складе WB в Подольске привлекли 56 пожарных и 14 автоцистерн</a></td>
+              <td>К тушению возгорания на территории логистического комплекса Wildberries в подмосковном Подольске привлекли 56 пожарных и 14 автоцистерн. Об этом рассказал глава городского округа Григорий Артамонов в Telegram.</td>
+            </tr>
+            
+            <tr>
+              <td>Коммерсантъ</td>
+              <td>2026-08-16 11:10</td>
+              <td><a href="https://www.kommersant.ru/doc/8890623">Беспилотники атаковали склад Wildberries в Подольске // В Подольске на складе Wildberries из-за атаки ВСУ начался пожар</a></td>
+              <td>На логистическом комплексе Wildberries в подмосковном Подольске после атаки беспилотников начался пожар. Об этом сообщил губернатор Московской области Андрей Воробьев в Telegram.</td>
+            </tr>
+            
+            <tr>
+              <td>Retailer.ru</td>
+              <td>2026-08-16 14:38</td>
+              <td><a href="https://retailer.ru/odin-iz-krupnejshih-skladov-wildberries-koledino-v-podolske-zagorelsja-posle-ataki-bespilotnikov/">Один из крупнейших складов Wildberries «Коледино» в Подольске загорелся после атаки беспилотников</a></td>
+              <td>В компании заявили, что эвакуация проведена заблаговременно в соответствии с требованиями безопасности, пострадавших среди сотрудников нет . Сообщение Один из крупнейших складов Wildberries «Коледино» в Подольске загорелся после атаки беспилотников появились сначала на RETAILER.ru .</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
