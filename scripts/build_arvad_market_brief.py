@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import base64
+import html as html_module
 import json
 import os
 import re
@@ -240,6 +241,7 @@ EXCLUDE_KEYWORDS = [
     "робокурьер",
     "\\bавто\\b",
     "автомобил",
+    "автозапчаст",
     "палат",
     "сапборд",
 ]
@@ -258,8 +260,24 @@ IRRELEVANT_KEYWORDS = [
     "свадьб",
     "суд отправил",
     "мотоцикл",
+    "автозапчаст",
     "кинотеатр",
     "посольств",
+]
+
+BOILERPLATE_NOISE_KEYWORDS = [
+    "правилами поведения",
+    "правила поведения",
+    "пользовательское соглашение",
+    "политика конфиденциальности",
+    "cookie",
+    "личный кабинет",
+    "войти",
+    "регистрац",
+    "подписаться",
+    "рассылка",
+    "ваканс",
+    "карьера",
 ]
 
 GENERIC_RETAIL_NOISE_KEYWORDS = [
@@ -578,17 +596,27 @@ def ensure_output_dirs() -> None:
 
 
 def fetch_url(url: str, timeout: int = 30) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    req = urllib.request.Request(normalize_url(url), headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=timeout) as response:
         return response.read()
 
 
 def normalize_text(text: str) -> str:
     clean = re.sub(r"<[^>]+>", " ", text or "")
+    clean = re.sub(r"<!--.*?-->", " ", clean, flags=re.S)
+    clean = html_module.unescape(clean)
     clean = clean.replace("&nbsp;", " ")
     clean = clean.replace("&#33;", "!")
     clean = re.sub(r"\s+", " ", clean)
     return clean.strip()
+
+
+def normalize_url(url: str) -> str:
+    parsed = urllib.parse.urlsplit(url)
+    if not parsed.netloc:
+        return url
+    netloc = parsed.netloc.encode("idna").decode("ascii")
+    return urllib.parse.urlunsplit((parsed.scheme, netloc, parsed.path, parsed.query, parsed.fragment))
 
 
 def resolve_url(base_url: str, href: str) -> str:
@@ -830,6 +858,10 @@ def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int
 
 def is_relevant(title: str, snippet: str) -> bool:
     text = f"{title} {snippet}".lower()
+    if has_regex_pattern(text, BOILERPLATE_NOISE_KEYWORDS):
+        return False
+    if re.search(r"\b20(1[0-9]|2[0-4])\b", text):
+        return False
     if has_regex_pattern(text, EXCLUDE_KEYWORDS):
         return False
     if is_incident_noise(text) and not has_incident_business_impact(text):
@@ -1224,12 +1256,12 @@ def classify_article_block(article: Article) -> Optional[str]:
     haystack = f"{article.title} {article.snippet}".lower()
     if any(keyword in haystack for keyword in ["беларус", "минск", "belta", "еаэс", "брест", "право.by"]):
         return "Беларусь" if is_block_relevant("Беларусь", haystack) else None
+    if any(keyword in haystack for keyword in ["diy", "лемана", "леруа", "петрович", "максидом", "всеинструменты", "obi"]):
+        return "DIY ритейл" if is_block_relevant("DIY ритейл", haystack) else None
     if any(keyword in haystack for keyword in ["wildberries", "ozon", "яндекс маркет", "маркетплейс", "селлер", "комисси", "карточ", "авито"]):
         return "Маркетплейсы и каналы" if is_block_relevant("Маркетплейсы и каналы", haystack) else None
     if any(keyword in haystack for keyword in ["ипотек", "новостро", "ремонт", "отделк", "строитель", "жиль", "квартир", "дом"]):
         return "Стройка, жильё и ремонт" if is_block_relevant("Стройка, жильё и ремонт", haystack) else None
-    if any(keyword in haystack for keyword in ["diy", "лемана", "леруа", "петрович", "максидом", "всеинструменты", "obi"]):
-        return "DIY ритейл" if is_block_relevant("DIY ритейл", haystack) else None
     if any(keyword in haystack for keyword in ["китай", "юан", "cny", "импорт", "тамож", "пошлин", "платеж", "логист", "достав", "склад", "топлив", "перевоз"]):
         return "Импорт, Китай, логистика и платежи" if is_block_relevant("Импорт, Китай, логистика и платежи", haystack) else None
     if any(keyword in haystack for keyword in ["гост", "локализ", "минпром", "сертифик", "регулирован", "поддержк", "маркиров", "российской полке", "налогооблож"]):
