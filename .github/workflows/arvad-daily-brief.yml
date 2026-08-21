@@ -2,8 +2,6 @@ name: ARVAD Weekly Market Brief
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "30 2 * * 1"
 
 jobs:
   build-brief:
@@ -14,8 +12,6 @@ jobs:
       TZ: Asia/Yekaterinburg
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5' }}
-      ARVAD_BITRIX_WEBHOOK_URL: ${{ secrets.ARVAD_BITRIX_WEBHOOK_URL }}
-      ARVAD_BITRIX_DIALOG_ID: ${{ vars.ARVAD_BITRIX_DIALOG_ID || '5' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -30,8 +26,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Build weekly brief and send HTML to Bitrix24
-        run: python scripts/build_arvad_market_brief.py --lookback-hours 168 --send-bitrix
+      - name: Build weekly brief locally in GitHub runner
+        run: python scripts/build_arvad_market_brief.py --lookback-hours 168
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7

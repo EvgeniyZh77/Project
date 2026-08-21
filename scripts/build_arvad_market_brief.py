@@ -37,14 +37,20 @@ COMPANY_CONTEXT = """ARVAD GROUP производит сантехнику в К
 
 PROMPT_RULES = """Подготовь недельную управленческую сводку для ARVAD GROUP.
 Формат результата строго JSON с полями:
-title, day_assessment, main_signals, fx_block, actions_today, watch_signals.
-main_signals: массив из 6-10 объектов с полями source, happened, why, action.
+title, day_assessment, main_signals, grouped_signals, fx_block, fx_history, fx_forecast, actions_today, watch_signals, competitor_signals.
+grouped_signals: объект с ключами:
+Маркетплейсы и каналы, Стройка, жильё и ремонт, DIY ритейл, Импорт, Китай, логистика и платежи, Регулирование и локализация, Беларусь.
+В каждом блоке массив объектов с полями source, happened, why, action.
+main_signals: плоский массив из grouped_signals в том же формате.
 actions_today: 3-5 коротких конкретных действий.
 watch_signals: 2-4 темы.
 Пиши по-русски, коротко и по делу.
+Используй prebuilt_summary как жесткий каркас. Не удаляй уже отобранные grouped_signals без веской причины, можно только уточнять формулировки.
+Если по блоку есть релевантные сигналы, не оставляй его пустым.
 Фокус: маркетплейсы, DIY, ритейл, стройка, импорт, Китай, Беларусь, регулирование, конкуренты.
 Жестко исключай нерелевантный шум: FMCG, продукты питания, рестораны, fashion, электроника, спорт, lifestyle и общий ритейл без прямой связи с сантехникой, ремонтом, DIY, импортом, локализацией, Беларусью или каналами ARVAD.
 Не включай общие корпоративные или потребительские новости, если у них нет прямого эффекта на спрос на сантехнику, закупки, цены, логистику, платежи, локализацию, сертификацию или ключевые каналы продаж ARVAD.
+Не поднимай в ключевые сигналы пожары, криминал, стихийные происшествия и прочий аварийный шум, если нет прямого и доказуемого влияния на поставки, остатки, комиссии, сроки или условия работы канала.
 Если обязательных источников мало, честно говори это в day_assessment.
 Не добавляй ничего вне JSON."""
 
@@ -379,6 +385,36 @@ HARD_EXCLUDE_KEYWORDS = [
     "джигурд",
 ]
 
+INCIDENT_NOISE_KEYWORDS = [
+    "пожар",
+    "возгорани",
+    "задымлен",
+    "эвакуац",
+    "спасател",
+    "пострадав",
+    "погиб",
+    "обрушен",
+    "взрыв",
+    "чп",
+]
+
+INCIDENT_IMPACT_KEYWORDS = [
+    "компенсац",
+    "задерж",
+    "срок",
+    "мощност",
+    "штраф",
+    "fbo",
+    "fbs",
+    "остатк",
+    "перераспредел",
+    "селлер",
+    "продавц",
+    "постав",
+    "достав",
+    "логист",
+]
+
 FINANCE_NOISE_KEYWORDS = [
     "акции",
     "мосбирж",
@@ -439,19 +475,50 @@ MANDATORY_SOURCES = {
     "РБК": "https://rssexport.rbc.ru/rbcnews/news/30/full.rss",
     "Коммерсантъ": "https://www.kommersant.ru/RSS/news.xml",
     "Интерфакс": "https://www.interfax.ru/rss.asp",
-}
-
-ADDITIONAL_SOURCES = {
     "БЕЛТА": "https://belta.by/rss",
 }
 
-ENHANCEMENT_SOURCE_PAGES = {
+ADDITIONAL_SOURCES = {
+}
+
+MANDATORY_SOURCE_PAGES = {
+    "Forbes": "https://www.forbes.ru",
+    "VC.ru": "https://vc.ru",
+    "Дзен": "https://dzen.ru",
+    "Т-Ж": "https://journal.tinkoff.ru",
+    "РБК Pro": "https://pro.rbc.ru",
+    "РБК Недвижимость": "https://realty.rbc.ru",
+    "New Retail": "https://new-retail.ru",
     "TPMag DIY & Household": "https://tpmag.ru/news/diy/",
     "DIYNews pressa": "https://diynews.ru/pressa.aspx",
     "Всеостройке.рф": "https://всеостройке.рф",
     "ЕРЗ.РФ Новости": "https://erzrf.ru/news/",
-    "РБК Недвижимость": "https://realty.rbc.ru",
-    "New Retail": "https://new-retail.ru",
+    "C-O-K": "https://www.c-o-k.ru",
+    "ПрофСан ПСМ": "https://profsan-psm.ru/statii",
+    "Santehnika Online тренды": "https://santehnika-online.ru/wiki/trendy/",
+    "Skillbox Media": "https://skillbox.ru/media/",
+    "Ozon Seller": "https://seller.ozon.ru/",
+    "Data Insight": "https://datainsight.ru",
+    "АКИТ": "https://akit.ru",
+    "Минпромторг": "https://minpromtorg.gov.ru",
+    "ФТС России": "https://customs.gov.ru",
+    "ЦБ РФ": "https://www.cbr.ru",
+    "Дом.РФ": "https://дом.рф",
+    "Наш.Дом.РФ": "https://наш.дом.рф",
+    "ЕРЗ.РФ": "https://erzrf.ru",
+    "ЦИАН Новости": "https://www.cian.ru/novosti/",
+    "ИРН": "https://www.irn.ru",
+    "СтройПульс": "https://stroypuls.ru",
+    "Стройгаз": "https://stroygaz.ru",
+    "Право.by": "https://pravo.by",
+    "Office Life Беларусь": "https://officelife.media",
+    "Ozon": "https://www.ozon.ru",
+    "Wildberries": "https://www.wildberries.ru",
+    "Яндекс Маркет": "https://market.yandex.ru",
+    "ВсеИнструменты": "https://www.vseinstrumenti.ru",
+    "Петрович": "https://petrovich.ru",
+    "Лемана ПРО": "https://lemanapro.ru",
+    "Максидом": "https://www.maxidom.ru",
 }
 
 COMPETITOR_CHANNELS = {
@@ -522,6 +589,10 @@ def normalize_text(text: str) -> str:
     clean = clean.replace("&#33;", "!")
     clean = re.sub(r"\s+", " ", clean)
     return clean.strip()
+
+
+def resolve_url(base_url: str, href: str) -> str:
+    return urllib.parse.urljoin(base_url, href)
 
 
 def slugify_date(dt: datetime) -> str:
@@ -623,6 +694,14 @@ def has_arvad_context_anchor(text: str) -> bool:
     )
 
 
+def is_incident_noise(text: str) -> bool:
+    return count_keyword_hits(text, INCIDENT_NOISE_KEYWORDS) > 0
+
+
+def has_incident_business_impact(text: str) -> bool:
+    return count_keyword_hits(text, INCIDENT_IMPACT_KEYWORDS) >= 2
+
+
 def is_block_relevant(block: str, text: str) -> bool:
     if has_regex_pattern(text, EXCLUDE_KEYWORDS):
         return False
@@ -632,6 +711,8 @@ def is_block_relevant(block: str, text: str) -> bool:
         return False
 
     if block == "Маркетплейсы и каналы":
+        if is_incident_noise(text) and not has_incident_business_impact(text):
+            return False
         return (
             has_channel_anchor(text)
             and count_keyword_hits(text, MARKETPLACE_ACTION_KEYWORDS) >= 1
@@ -658,9 +739,18 @@ def is_block_relevant(block: str, text: str) -> bool:
         )
 
     if block == "DIY ритейл":
-        return any(keyword in text for keyword in ["diy", "лемана", "леруа", "петрович", "максидом", "всеинструменты", "obi"])
+        return (
+            any(keyword in text for keyword in ["diy", "лемана", "леруа", "петрович", "максидом", "всеинструменты", "obi"])
+            and (
+                count_keyword_hits(text, BUSINESS_SIGNAL_KEYWORDS) >= 1
+                or has_product_anchor(text)
+                or has_demand_anchor(text)
+            )
+        )
 
     if block == "Импорт, Китай, логистика и платежи":
+        if is_incident_noise(text) and not any(keyword in text for keyword in ["китай", "импорт", "тамож", "платеж", "юан"]):
+            return False
         return (
             has_supply_anchor(text)
             and ("китай" in text or "импорт" in text or "тамож" in text or "платеж" in text or "юан" in text)
@@ -727,6 +817,8 @@ def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int
     score += count_keyword_hits(text, SUPPLY_ANCHOR_KEYWORDS) * 2
     if has_regex_pattern(text, EXCLUDE_KEYWORDS):
         score -= 12
+    if is_incident_noise(text) and not has_incident_business_impact(text):
+        score -= 14
     if has_regex_pattern(text, GENERIC_RETAIL_NOISE_KEYWORDS) and not has_product_anchor(text):
         score -= 10
     if mandatory:
@@ -739,6 +831,8 @@ def score_article(source: str, title: str, snippet: str, mandatory: bool) -> int
 def is_relevant(title: str, snippet: str) -> bool:
     text = f"{title} {snippet}".lower()
     if has_regex_pattern(text, EXCLUDE_KEYWORDS):
+        return False
+    if is_incident_noise(text) and not has_incident_business_impact(text):
         return False
     if has_regex_pattern(text, GENERIC_RETAIL_NOISE_KEYWORDS) and not has_product_anchor(text):
         return False
@@ -796,6 +890,42 @@ def parse_rss(source: str, url: str, mandatory: bool, min_dt: datetime, max_dt: 
             )
         )
     return articles
+
+
+def parse_source_page(source: str, url: str, mandatory: bool, run_date: datetime) -> list[Article]:
+    html = fetch_url(url, timeout=40).decode("utf-8", errors="ignore")
+    candidates: list[Article] = []
+    seen_urls = set()
+    anchor_pattern = re.compile(r"<a\b[^>]*href=[\"']([^\"']+)[\"'][^>]*>(.*?)</a>", re.S | re.I)
+    for href, title_html in anchor_pattern.findall(html):
+        title = normalize_text(title_html)
+        if len(title) < 18:
+            continue
+        link = resolve_url(url, href)
+        if link in seen_urls or link.rstrip("/") == url.rstrip("/"):
+            continue
+        if link.startswith(("mailto:", "tel:", "javascript:")):
+            continue
+        text = title.lower()
+        score = score_article(source, title, "", mandatory)
+        if score < 5 or not is_relevant(title, ""):
+            continue
+        candidates.append(
+            Article(
+                source=source,
+                title=title[:220],
+                url=link,
+                published_at=run_date.strftime("%Y-%m-%d %H:%M"),
+                snippet=title[:420],
+                mandatory=mandatory,
+                score=score,
+                theme=detect_theme(text),
+            )
+        )
+        seen_urls.add(link)
+        if len(candidates) >= 12:
+            break
+    return candidates
 
 
 def fetch_cbr_rates(run_date: datetime) -> dict[str, str]:
@@ -872,6 +1002,11 @@ def gather_articles(run_date: datetime, lookback_hours: int) -> list[Article]:
             articles.extend(parse_rss(source, url, False, min_dt, max_dt))
         except Exception as exc:
             print(f"Warning: failed to fetch additional source {source}: {exc}", file=sys.stderr)
+    for source, url in MANDATORY_SOURCE_PAGES.items():
+        try:
+            articles.extend(parse_source_page(source, url, True, run_date))
+        except Exception as exc:
+            print(f"Warning: failed to fetch mandatory page source {source}: {exc}", file=sys.stderr)
 
     unique: dict[str, Article] = {}
     for article in sorted(articles, key=lambda item: (item.score, item.published_at), reverse=True):
@@ -1144,9 +1279,16 @@ def merge_supplemental_signals(
     for signal in supplemental_signals:
         by_block.setdefault(signal.block, []).append(signal)
     for block in BLOCK_QUOTAS:
-        if grouped_signals.get(block):
-            continue
-        for signal in by_block.get(block, [])[:1]:
+        existing_topics = {
+            f"{item.get('source', '')}|{item.get('happened', '')[:80]}"
+            for item in grouped_signals.get(block, [])
+        }
+        for signal in by_block.get(block, []):
+            if len(grouped_signals[block]) >= BLOCK_QUOTAS[block]:
+                break
+            topic_key = f"{signal.source}|{signal.happened[:80]}"
+            if topic_key in existing_topics:
+                continue
             grouped_signals[block].append(
                 {
                     "source": signal.source,
@@ -1155,6 +1297,7 @@ def merge_supplemental_signals(
                     "action": signal.action,
                 }
             )
+            existing_topics.add(topic_key)
     return grouped_signals
 
 
@@ -1229,6 +1372,37 @@ def build_fallback_summary(
     }
 
 
+def stabilize_summary(summary: dict, fallback: dict, competitor_signals: list[CompetitorSignal]) -> dict:
+    result = dict(summary or {})
+    fallback_grouped = fallback.get("grouped_signals", {})
+    current_grouped = result.get("grouped_signals")
+
+    if not isinstance(current_grouped, dict):
+        current_grouped = fallback_grouped
+
+    merged_grouped = {}
+    for block in BLOCK_QUOTAS:
+        current_items = current_grouped.get(block, []) if isinstance(current_grouped, dict) else []
+        if not current_items and fallback_grouped.get(block):
+            current_items = fallback_grouped.get(block, [])
+        merged_grouped[block] = current_items[: BLOCK_QUOTAS[block]]
+    result["grouped_signals"] = merged_grouped
+
+    if len(flatten_grouped_signals(merged_grouped)) < 4:
+        result["grouped_signals"] = fallback_grouped
+
+    result["main_signals"] = flatten_grouped_signals(result["grouped_signals"])
+    result["title"] = result.get("title") or fallback.get("title")
+    result["day_assessment"] = result.get("day_assessment") or fallback.get("day_assessment")
+    result["fx_block"] = result.get("fx_block") or fallback.get("fx_block")
+    result["fx_history"] = result.get("fx_history") or fallback.get("fx_history", {})
+    result["fx_forecast"] = result.get("fx_forecast") or fallback.get("fx_forecast", {})
+    result["actions_today"] = (result.get("actions_today") or fallback.get("actions_today", []))[:5]
+    result["watch_signals"] = (result.get("watch_signals") or fallback.get("watch_signals", []))[:4]
+    result["competitor_signals"] = result.get("competitor_signals") or [asdict(item) for item in competitor_signals[:8]]
+    return result
+
+
 def extract_response_text(payload: dict) -> str:
     if isinstance(payload.get("output_text"), str) and payload["output_text"].strip():
         return payload["output_text"]
@@ -1249,8 +1423,8 @@ def call_openai(summary_seed: dict, articles: list[Article], competitor_signals:
     seed_json = {
         "company_context": COMPANY_CONTEXT,
         "prebuilt_summary": summary_seed,
-        "articles": [asdict(article) for article in articles[:12]],
-        "competitor_signals": [asdict(item) for item in competitor_signals[:6]],
+        "articles": [asdict(article) for article in articles[:24]],
+        "competitor_signals": [asdict(item) for item in competitor_signals[:8]],
     }
     payload = {
         "model": model,
@@ -1899,7 +2073,7 @@ def main():
     fallback = build_fallback_summary(articles, competitor_signals, run_date, args.lookback_hours, rates, fx_history)
     openai_summary, openai_status = call_openai(fallback, articles, competitor_signals)
     print(openai_status)
-    summary = openai_summary or fallback
+    summary = stabilize_summary(openai_summary or fallback, fallback, competitor_signals)
     outputs = write_outputs(summary, articles, competitor_signals, run_date)
     save_latest_cache(summary, articles, competitor_signals, rates, run_date)
 
